@@ -7,6 +7,10 @@ ship = { x = 60, y = 60, sp = 1 }
 function _update()
   t = (t + 1) % 6
   ship.sp = (t < 3) and 1 or 2
+  if btn(0) then ship.x -= 1 end
+  if btn(1) then ship.x += 1 end
+  if btn(2) then ship.y -= 1 end
+  if btn(3) then ship.y += 1 end
 end
 
 function _draw()
