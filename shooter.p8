@@ -7,7 +7,13 @@ ship = {
   y = 60,
   sp = 1,
   h=3,
-  p=0
+  p=0,
+  box={
+    x1=0,
+    y1=0,
+    x2=7,
+    y2=7,
+  }
 }
 bullets = {}
 enemies = {}
@@ -19,7 +25,22 @@ for i=1,8 do
     x=-64,
     y=-64,
     r=12,
+    box={
+      x1=0,
+      y1=0,
+      x2=7,
+      y2=7,
+    }
   })
+end
+
+function abs_box(s)
+  local box = {}
+  box.x1 = s.x + s.box.x1
+  box.y1 = s.y + s.box.y1
+  box.x2 = s.x + s.box.x2
+  box.y2 = s.y + s.box.y2
+  return box
 end
 
 function _update()
@@ -62,10 +83,27 @@ function fire()
     y = ship.y,
     dx = 0,
     dy = -3,
+    box={
+      x1=3,
+      y1=0,
+      x2=4,
+      y2=2,
+    }
   })
 end
 
-function collide()
+function collide(a, b)
+  local box_a = abs_box(a)
+  local box_b = abs_box(b)
+
+  if box_a.x1 > box_b.x2 or
+     box_a.y1 > box_b.y2 or
+     box_b.x1 > box_a.x2 or
+     box_b.y1 > box_a.y2 then
+    return false
+  end
+
+  return true
 end
 
 function _draw()
