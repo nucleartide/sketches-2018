@@ -13,7 +13,9 @@ ship = {
     y1=0,
     x2=7,
     y2=7,
-  }
+  },
+  t=0,
+  imm=false
 }
 bullets = {}
 enemies = {}
@@ -62,12 +64,13 @@ end
 
 function draw_over()
   cls()
-  print("game over, sucks for you", 50, 50)
+  print("game over", 50, 50)
 end
 
 function update_game()
   t = (t + 1) % 6
   ship.sp = (t < 3) and 1 or 2
+
   for b in all(bullets) do
     b.x += b.dx
     b.y += b.dy
@@ -82,12 +85,26 @@ function update_game()
       end
     end
   end
+
+  if ship.imm then
+    ship.t += 1
+
+    if ship.t >= 30 then
+      ship.imm = false
+      ship.t = 0
+    end
+  end
+
   for e in all(enemies) do
     e.x = e.m_x + e.r * cos(time())
     e.y = e.m_y + e.r * sin(time())
 
-    if collide(e, ship) then
-      -- TODO
+    if collide(e, ship) and not ship.imm then
+      ship.imm = true
+      ship.h -= 1
+      if ship.h < 1 then
+        game_over()
+      end
     end
   end
 
@@ -130,9 +147,12 @@ end
 
 function draw_game()
   cls()
-  --print(#bullets)
   print(time())
-  spr(ship.sp, ship.x, ship.y)
+
+  if not ship.imm or t < 3 then
+    spr(ship.sp, ship.x, ship.y)
+  end
+
   for b in all(bullets) do
     spr(b.sp, b.x, b.y)
   end
