@@ -43,7 +43,29 @@ function abs_box(s)
   return box
 end
 
-function _update()
+function _init()
+  start()
+end
+
+function start()
+  _update = update_game
+  _draw = draw_game
+end
+
+function game_over()
+  _update = update_over
+  _draw = draw_over
+end
+
+function update_over()
+end
+
+function draw_over()
+  cls()
+  print("game over, sucks for you", 50, 50)
+end
+
+function update_game()
   t = (t + 1) % 6
   ship.sp = (t < 3) and 1 or 2
   for b in all(bullets) do
@@ -106,7 +128,7 @@ function collide(a, b)
   return true
 end
 
-function _draw()
+function draw_game()
   cls()
   --print(#bullets)
   print(time())
