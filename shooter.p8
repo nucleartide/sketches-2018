@@ -2,7 +2,13 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 t = 0
-ship = { x = 60, y = 60, sp = 1, h=3 }
+ship = {
+  x = 60,
+  y = 60,
+  sp = 1,
+  h=3,
+  p=0
+}
 bullets = {}
 enemies = {}
 for i=1,8 do
@@ -26,10 +32,20 @@ function _update()
        b.y < 0 or 127 < b.y then
       del(bullets, b)
     end
+    for e in all(enemies) do
+      if collide(e, b) then
+        del(enemies, e)
+        ship.p += 1
+      end
+    end
   end
   for e in all(enemies) do
     e.x = e.m_x + e.r * cos(time())
     e.y = e.m_y + e.r * sin(time())
+
+    if collide(e, ship) then
+      -- TODO
+    end
   end
 
   if btn(0) then ship.x -= 1 end
@@ -47,6 +63,9 @@ function fire()
     dx = 0,
     dy = -3,
   })
+end
+
+function collide()
 end
 
 function _draw()
