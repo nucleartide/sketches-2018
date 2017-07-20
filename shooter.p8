@@ -20,6 +20,8 @@ ship = {
 bullets = {}
 enemies = {}
 explosions = {}
+stars = {
+}
 for i=1,8 do
   add(enemies, {
     sp=17,
@@ -34,6 +36,13 @@ for i=1,8 do
       x2=7,
       y2=7,
     }
+  })
+end
+for i=1,128 do
+  add(stars, {
+    x=rnd(128),
+    y=rnd(128),
+    s=rnd(2)+1,
   })
 end
 
@@ -90,6 +99,14 @@ function update_game()
         })
         ship.p += 1
       end
+    end
+  end
+
+  for s in all(stars) do
+    s.y += s.s
+    if s.y > 128 then
+      s.y = 0
+      s.x = rnd(128)
     end
   end
 
@@ -182,6 +199,10 @@ function draw_game()
     else
       spr(34, 80+6*i, 6)
     end
+  end
+
+  for s in all(stars) do
+    pset(s.x,s.y,6)
   end
 end
 __gfx__
