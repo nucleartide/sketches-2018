@@ -2,22 +2,22 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 Color = {
-  Black     = 0,
-  DarkBlue  = 1,
-  Purple    = 2,
-  Green     = 3,
-  Brown     = 4,
-  DarkGray  = 5,
-  LightGray = 6,
-  White     = 7,
-  Red       = 8,
-  Orange    = 9,
-  Yellow    = 10,
-  Green     = 11,
-  SkyBlue   = 12,
-  Indigo    = 13,
-  Pink      = 14,
-  Skin      = 15,
+  Black      = 0,
+  DarkBlue   = 1,
+  DarkPurple = 2,
+  DarkGreen  = 3,
+  Brown      = 4,
+  DarkGray   = 5,
+  LightGray  = 6,
+  White      = 7,
+  Red        = 8,
+  Orange     = 9,
+  Yellow     = 10,
+  Green      = 11,
+  Blue       = 12,
+  Indigo     = 13,
+  Pink       = 14,
+  Peach      = 15,
 }
 
 function stroke(print_fn, border_col)
@@ -76,6 +76,56 @@ function example_character_set()
   print('\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf')
   print('\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef')
   print('\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff')
+end
+
+-- dim on key press
+
+function dim()
+  pal()
+  pal(Color.Black, Color.Black, 1)
+  pal(Color.DarkBlue, Color.Black, 1)
+  pal(Color.DarkPurple, Color.Black, 1)
+  pal(Color.DarkGreen, Color.DarkBlue, 1)
+  pal(Color.Brown, Color.DarkPurple, 1)
+  pal(Color.DarkGray, Color.Black, 1)
+  pal(Color.LightGray, Color.DarkGray, 1)
+  pal(Color.White, Color.DarkGray, 1)
+  pal(Color.Red, Color.DarkPurple, 1)
+  pal(Color.Orange, Color.Brown, 1)
+  pal(Color.Yellow, Color.Brown, 1)
+  pal(Color.Green, Color.DarkGreen, 1)
+  pal(Color.Blue, Color.DarkBlue, 1)
+  pal(Color.Indigo, Color.DarkBlue, 1)
+  pal(Color.Pink, Color.DarkPurple, 1)
+  pal(Color.Peach, Color.Brown, 1)
+end
+
+-- one second after dim, then start game
+
+function blackout()
+  pal()
+  pal(Color.Black, Color.Black, 1)
+  pal(Color.DarkBlue, Color.Black, 1)
+  pal(Color.DarkPurple, Color.Black, 1)
+  pal(Color.DarkGreen, Color.Black, 1)
+  pal(Color.Brown, Color.Black, 1)
+  pal(Color.DarkGray, Color.Black, 1)
+  pal(Color.LightGray, Color.Black, 1)
+  pal(Color.White, Color.Black, 1)
+  pal(Color.Red, Color.Black, 1)
+  pal(Color.Orange, Color.Black, 1)
+  pal(Color.Yellow, Color.Black, 1)
+  pal(Color.Green, Color.Black, 1)
+  pal(Color.Blue, Color.Black, 1)
+  pal(Color.Indigo, Color.Black, 1)
+  pal(Color.Pink, Color.Black, 1)
+  pal(Color.Peach, Color.Black, 1)
+end
+
+function _draw()
+  example_fancy_print()
+  dim()
+  blackout()
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
