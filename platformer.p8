@@ -120,6 +120,15 @@ function _update()
       change_state(0) -- back to idle state
     end
   end
+
+  -- jump state
+  if pstate == 3 then
+    pspr = 2
+    py -= 6-pat
+    if (left) px -= 2
+    if (right) px += 2
+    if (not up or pat > 7) change_state(0)
+  end
 end
 
 function canfall()
