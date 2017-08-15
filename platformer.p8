@@ -6,13 +6,6 @@ __lua__
 -- button constants.
 --
 
---left  = 0
---right = 1
---up    = 2
---down  = 3
---z     = 4
---x     = 5
-
 -- player = {
 --   x = 0,
 --   y = 0,
@@ -42,106 +35,224 @@ __lua__
 --   for e in all(entities) do e.draw() end
 -- end
 
-function _init()
-  px = 20 -- x-position
-  py = 64 -- y-position
-  pstate = 0 -- current player state
-  pspr = 0 -- current sprite
-  pdir = 0 -- current direction
-  pat = 0 -- player state timer (amount of time spent in a state)
-end
+--
+-- Buttons.
+--
 
-function _draw()
-  -- draw the world
-  -- celx, cely, sx, sy, celw, celh
-  map(0, 0, 0, 0, 16, 16)
+Btn = {
+  Left  = 0,
+  Right = 1,
+  Up    = 2,
+  Down  = 3,
+  Z     = 4,
+  X     = 5,
+}
 
-  -- draw the player, we use dir to mirror sprites
-  local flip = pdir == -1
-  spr(pspr, px, py, 1, 1, flip)
-end
+--
+-- Player state.
+--
 
-function change_state(s)
-  pstate = s
-  pat = 0
-end
+PlayerState = {
+  Idle = 0,
+  Walk = 1,
+  Drop = 2,
+  Jump = 3,
+}
 
-function _update()
-  b0 = btn(0)
-  b1 = btn(1)
-  b2 = btn(2)
+--
+-- Player class.
+--
 
-  left = b0
-  right = b1
-  up = b2
+function Player()
+  -- x-position in pixels
+  local x = 20
 
-  px = (px+128) % 128 -- wrap around levels
-  pat += 1 -- increment state clock
+  -- y-position in pixels
+  local y = 64
+
+  -- current sprite index
+  local sprite = 0
+
+  -- notable sprite indices
+  local sprite_idle = 17
+  local sprite_walk1 = 18
+  local sprite_walk2 = 19
+
+  -- current direction
+  local dir = 0
+
+  -- number of frames spent in current state
+  local at = 0
+
+  -- player states
+  local idle
+  local walk
+  local fall
+  local jump
+  local state
 
   -- idle state
-  if pstate == 0 then
-    pspr = 0
-    if (b0 or b1) then change_state(1) end -- change to walk
-    if (b2) then change_state(3) end -- jump
-    if (canfall()) then change_state(2) end -- drop...?
+  idle = function()
+    player.sprite = player.sprite_idle
+
+    if btn(Btn.Left) or btn(Btn.Right) then
+      state = walk
+    end
+
+    if btn(Btn.Up) then
+    end
+
+    if then
+    end
   end
 
   -- walk state
-  if pstate == 1 then
-    if (left) then pdir = -1 end
-    if (right) then pdir = 1 end
-    px += pdir * min(pat, 2) -- first frame is 1, after is 2
-    pspr = flr(pat/2) % 2 -- change sprite every 2 frames
-
-    if not (left or right) then
-      change_state(0) -- idle
-    end
-
-    if up then
-      change_state(3) -- jump
-    end
-
-    if canfall() then
-      change_state(2) -- drop
-    end
+  walk = function()
   end
 
   -- fall state
-  if pstate == 2 then
-    pspr = 2
-
-    if canfall() then
-      if left then px -= 1 end -- steer left
-      if right then px += 1 end -- steer right
-      py += min(4, pat) -- move the player
-      if not canfall() then py = flr(py/8) * 8 end -- check ground contact
-    else
-      py = flr(py/8) *8 -- fix position when we hit ground
-      change_state(0) -- back to idle state
-    end
+  fall = function()
   end
 
   -- jump state
-  if pstate == 3 then
-    pspr = 2
-    py -= 6-pat
-    if (left) px -= 2
-    if (right) px += 2
-    if (not up or pat > 7) change_state(0)
+  jump = function()
   end
+
+  -- initialize player state
+  state = idle
+
+  return {
+    update = function()
+      -- btn(Btn.Left)
+      -- btn(Btn.Right)
+      -- btn(Btn.Up)
+
+      -- make map wrap around
+      player.x = player.x % 128
+
+      -- increment state clock
+      player.at += 1
+    end,
+
+    draw = function()
+    end,
+  }
 end
 
-function canfall()
-  -- get the map tile under the player
-  local v = mget(
-    flr((px+4) / 8),
-    flr((py+8) / 8)
-  )
+-- function player()
+--   local foo = 'bar'
+--   local hello = 'world'
+-- 
+--   return {
+--     update = cocreate(function()
+--       -- blah
+--     end),
+-- 
+--     draw = cocreate(function()
+--       -- blah
+--     end),
+--   }
+-- end
 
-  -- see if it's flagged as well
-  local can_collide = fget(v, 0)
-  return not can_collide
+function _update()
+  player.update()
 end
+
+function _draw()
+  player.draw()
+end
+
+-- function _draw()
+--   -- draw the world
+--   -- celx, cely, sx, sy, celw, celh
+--   map(0, 0, 0, 0, 16, 16)
+-- 
+--   -- draw the player, we use dir to mirror sprites
+--   local flip = pdir == -1
+--   spr(pspr, px, py, 1, 1, flip)
+-- end
+-- 
+-- function change_state(s)
+--   pstate = s
+--   pat = 0
+-- end
+-- 
+-- function _update()
+--   b0 = btn(0)
+--   b1 = btn(1)
+--   b2 = btn(2)
+-- 
+--   left = b0
+--   right = b1
+--   up = b2
+-- 
+--   px = (px+128) % 128 -- wrap around levels
+--   pat += 1 -- increment state clock
+-- 
+--   -- idle state
+--   if pstate == 0 then
+--     pspr = 0
+--     if (b0 or b1) then change_state(1) end -- change to walk
+--     if (b2) then change_state(3) end -- jump
+--     if (canfall()) then change_state(2) end -- drop...?
+--   end
+-- 
+--   -- walk state
+--   if pstate == 1 then
+--     if (left) then pdir = -1 end
+--     if (right) then pdir = 1 end
+--     px += pdir * min(pat, 2) -- first frame is 1, after is 2
+--     pspr = flr(pat/2) % 2 -- change sprite every 2 frames
+-- 
+--     if not (left or right) then
+--       change_state(0) -- idle
+--     end
+-- 
+--     if up then
+--       change_state(3) -- jump
+--     end
+-- 
+--     if canfall() then
+--       change_state(2) -- drop
+--     end
+--   end
+-- 
+--   -- fall state
+--   if pstate == 2 then
+--     pspr = 2
+-- 
+--     if canfall() then
+--       if left then px -= 1 end -- steer left
+--       if right then px += 1 end -- steer right
+--       py += min(4, pat) -- move the player
+--       if not canfall() then py = flr(py/8) * 8 end -- check ground contact
+--     else
+--       py = flr(py/8) *8 -- fix position when we hit ground
+--       change_state(0) -- back to idle state
+--     end
+--   end
+-- 
+--   -- jump state
+--   if pstate == 3 then
+--     pspr = 2
+--     py -= 6-pat
+--     if (left) px -= 2
+--     if (right) px += 2
+--     if (not up or pat > 7) change_state(0)
+--   end
+-- end
+-- 
+-- function canfall()
+--   -- get the map tile under the player
+--   local v = mget(
+--     flr((px+4) / 8),
+--     flr((py+8) / 8)
+--   )
+-- 
+--   -- see if it's flagged as well
+--   local can_collide = fget(v, 0)
+--   return not can_collide
+-- end
 __gfx__
 00000000666666666666666666666666ccccccccccccccccc077cccc000000000000000000000000000000000000000000000000000000000000000000000000
 00000000aaaaaaaacaaaaaaaaaaaaaaccccccccccccc77cc0777777c000000000000000000000000000000000000000000000000000000000000000000000000
