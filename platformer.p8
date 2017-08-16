@@ -91,20 +91,26 @@ function Player()
   local jump
   local state
 
+  -- state transition function
+  function transition(new_state)
+    at = 0
+    state = new_state
+  end
+
   -- idle state
   idle = function()
     player.sprite = player.sprite_idle
 
     if btn(Btn.Left) or btn(Btn.Right) then
-      state = walk
+      transition(walk)
     end
 
     if btn(Btn.Up) then
-      state = jump
+      transition(jump)
     end
 
     if canfall() then
-      state = fall
+      transition(fall)
     end
   end
 
@@ -161,6 +167,17 @@ function Player()
 
   -- jump state
   jump = function()
+    sprite = sprite_walk2
+
+    -- move
+    y += at-6
+    if btn(Btn.Left) x -= 2
+    if btn(Btn.Right) x += 2
+
+    -- back to idle
+    if not btn(Btn.Up) or at > 7 then
+      state = idle
+    end
   end
 
   -- initialize player state
@@ -168,15 +185,14 @@ function Player()
 
   return {
     update = function()
-      -- btn(Btn.Left)
-      -- btn(Btn.Right)
-      -- btn(Btn.Up)
-
       -- make map wrap around
       player.x = player.x % 128
 
       -- increment state clock
       player.at += 1
+
+      -- execute current state function
+      state()
     end,
 
     draw = function()
@@ -236,71 +252,6 @@ end
 -- function change_state(s)
 --   pstate = s
 --   pat = 0
--- end
--- 
--- function _update()
---   b0 = btn(0)
---   b1 = btn(1)
---   b2 = btn(2)
--- 
---   left = b0
---   right = b1
---   up = b2
--- 
---   px = (px+128) % 128 -- wrap around levels
---   pat += 1 -- increment state clock
--- 
---   -- idle state
---   if pstate == 0 then
---     pspr = 0
---     if (b0 or b1) then change_state(1) end -- change to walk
---     if (b2) then change_state(3) end -- jump
---     if (canfall()) then change_state(2) end -- drop...?
---   end
--- 
---   -- walk state
---   if pstate == 1 then
---     if (left) then pdir = -1 end
---     if (right) then pdir = 1 end
---     px += pdir * min(pat, 2) -- first frame is 1, after is 2
---     pspr = flr(pat/2) % 2 -- change sprite every 2 frames
--- 
---     if not (left or right) then
---       change_state(0) -- idle
---     end
--- 
---     if up then
---       change_state(3) -- jump
---     end
--- 
---     if canfall() then
---       change_state(2) -- drop
---     end
---   end
--- 
---   -- fall state
---   if pstate == 2 then
---     pspr = 2
--- 
---     if canfall() then
---       if left then px -= 1 end -- steer left
---       if right then px += 1 end -- steer right
---       py += min(4, pat) -- move the player
---       if not canfall() then py = flr(py/8) * 8 end -- check ground contact
---     else
---       py = flr(py/8) *8 -- fix position when we hit ground
---       change_state(0) -- back to idle state
---     end
---   end
--- 
---   -- jump state
---   if pstate == 3 then
---     pspr = 2
---     py -= 6-pat
---     if (left) px -= 2
---     if (right) px += 2
---     if (not up or pat > 7) change_state(0)
---   end
 -- end
 __gfx__
 00000000666666666666666666666666ccccccccccccccccc077cccc000000000000000000000000000000000000000000000000000000000000000000000000
