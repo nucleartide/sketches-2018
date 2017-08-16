@@ -100,9 +100,11 @@ function Player()
     end
 
     if btn(Btn.Up) then
+      state = jump
     end
 
-    if then
+    if canfall() then
+      state = fall
     end
   end
 
@@ -160,6 +162,22 @@ end
 
 function _draw()
   player.draw()
+end
+
+--
+-- Util function.
+--
+
+function canfall(px, py)
+  -- get the map tile under the player
+  local sprite = mget(
+    flr((px+4) / 8),
+    flr((px+8) / 8)
+  )
+
+  -- see if it's flaged as well
+  local can_collide = fget(sprite, 0)
+  return not can_collide
 end
 
 -- function _draw()
@@ -240,18 +258,6 @@ end
 --     if (right) px += 2
 --     if (not up or pat > 7) change_state(0)
 --   end
--- end
--- 
--- function canfall()
---   -- get the map tile under the player
---   local v = mget(
---     flr((px+4) / 8),
---     flr((py+8) / 8)
---   )
--- 
---   -- see if it's flagged as well
---   local can_collide = fget(v, 0)
---   return not can_collide
 -- end
 __gfx__
 00000000666666666666666666666666ccccccccccccccccc077cccc000000000000000000000000000000000000000000000000000000000000000000000000
