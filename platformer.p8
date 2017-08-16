@@ -110,10 +110,53 @@ function Player()
 
   -- walk state
   walk = function()
+    if btn(Btn.Left) then
+      dir = -1
+    end
+
+    if btn(Btn.Right) then
+      dir = 1
+    end
+
+    -- gradually increase per-frame movement to 2
+    x += dir * min(at, 2)
+
+    -- change sprite every 2 frames
+    sprite = sprite_walk1 + flr(at/2) % 2
+
+    if not (btn(Btn.Left) or btn(Btn.Right)) then
+      state = idle
+    end
+
+    if btn(Btn.Up) then
+      state = jump
+    end
+
+    if canfall() then
+      state = fall
+    end
   end
 
   -- fall state
   fall = function()
+    sprite = sprite_walk2
+
+    if canfall() then
+      -- steer left
+      if btn(Btn.Left) then x -= 1 end
+
+      -- steer right
+      if btn(Btn.Right) then x += 1 end
+
+      -- move player
+      y += min(4, at)
+    end
+
+    if not canfall() then
+      -- back to idle
+      y = flr(y/8) * 8
+      state = idle
+    end
   end
 
   -- jump state
