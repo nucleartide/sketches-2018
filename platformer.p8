@@ -203,10 +203,10 @@ function canfall(px, py)
   -- get the map tile under the player
   local sprite = mget(
     flr((px+4) / 8),
-    flr((px+8) / 8)
+    flr((py+8) / 8)
   )
 
-  -- see if it's flaged as well
+  -- see if it's flagged as well
   local can_collide = fget(sprite, 0)
   return not can_collide
 end
