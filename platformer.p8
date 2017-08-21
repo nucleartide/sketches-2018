@@ -20,10 +20,10 @@ Btn = {
 --
 
 PlayerState = {
-  Idle = 0,
-  Walk = 1,
-  Drop = 2,
-  Jump = 3,
+  Idle   = 0,
+  Walk   = 1,
+  Aim    = 2,
+  Midair = 3,
 }
 
 --
@@ -54,8 +54,8 @@ function Player()
   -- player states
   local idle
   local walk
-  local fall
-  local jump
+  local aim
+  local midair
   local state
 
   -- state transition function
@@ -64,122 +64,123 @@ function Player()
     state = new_state
   end
 
-  -- idle state
-  idle = function()
-    sprite = sprite_idle
+  -- TODO: consider coroutines, don't want that single frame delay
 
-    if btn(Btn.Left) or btn(Btn.Right) then
-      transition(walk)
-    end
-
-    if btn(Btn.Up) then
-      transition(jump)
-    end
-
-    if canfall(x, y) then
-      transition(fall)
-    end
-  end
-
-  -- walk state
-  walk = function()
-    if btn(Btn.Left) then
-      dir = -1
-    end
-
-    if btn(Btn.Right) then
-      dir = 1
-    end
-
-    -- gradually increase per-frame movement to 2
-    x += dir * min(at, 2)
-
-    -- change sprite every 2 frames
-    sprite = sprite_walk1 + flr(at/2) % 2
-
-    if not (btn(Btn.Left) or btn(Btn.Right)) then
-      transition(idle)
-    end
-
-    if btn(Btn.Up) then
-      transition(jump)
-    end
-
-    if canfall(x, y) then
-      transition(fall)
-    end
-  end
-
-  -- fall state
-  fall = function()
-    sprite = sprite_walk2
-
-    if canfall(x, y) then
-      -- steer left
-      if btn(Btn.Left) then x -= 1 end
-
-      -- steer right
-      if btn(Btn.Right) then x += 1 end
-
-      -- move player
-      y += min(4, at)
-    end
-
-    if not canfall(x, y) then
-      -- back to idle
-      y = flr(y/8) * 8
-      transition(idle)
-    end
-  end
-
-  -- jump state
-  jump = function()
-    sprite = sprite_walk2
-
-    -- move
-    y += at-6
-    if btn(Btn.Left) then x -= 2 end
-    if btn(Btn.Right) then x += 2 end
-
-    -- back to idle
-    if not btn(Btn.Up) or at > 7 then
-      transition(idle)
-    end
-  end
-
-  -- initialize player state
-  transition(idle)
-
-  return {
-    update = function()
-      -- make map wrap around
-      x = x % 128
-
-      -- increment state clock
-      at += 1
-
-      -- execute current state function
-      state()
-    end,
-
-    draw = function()
-      -- draw the world
-      -- celx, cely, sx, sy, celw, celh
-      map(0, 0, 0, 0, 16, 16)
-
-      -- draw the player, use dir to mirror sprites
-      local flip = dir == -1
-      spr(sprite, x, y, 1, 1, flip)
-    end,
-  }
+--   -- idle state
+--   idle = function()
+--     sprite = sprite_idle
+-- 
+--     if btn(Btn.Left) or btn(Btn.Right) then
+--       transition(walk)
+--     end
+-- 
+--     if btn(Btn.Up) then
+--       transition(jump)
+--     end
+-- 
+--     if canfall(x, y) then
+--       transition(fall)
+--     end
+--   end
+-- 
+--   -- walk state
+--   walk = function()
+--     if btn(Btn.Left) then
+--       dir = -1
+--     end
+-- 
+--     if btn(Btn.Right) then
+--       dir = 1
+--     end
+-- 
+--     -- gradually increase per-frame movement to 2
+--     x += dir * min(at, 2)
+-- 
+--     -- change sprite every 2 frames
+--     sprite = sprite_walk1 + flr(at/2) % 2
+-- 
+--     if not (btn(Btn.Left) or btn(Btn.Right)) then
+--       transition(idle)
+--     end
+-- 
+--     if btn(Btn.Up) then
+--       transition(jump)
+--     end
+-- 
+--     if canfall(x, y) then
+--       transition(fall)
+--     end
+--   end
+-- 
+--   -- fall state
+--   fall = function()
+--     sprite = sprite_walk2
+-- 
+--     if canfall(x, y) then
+--       -- steer left
+--       if btn(Btn.Left) then x -= 1 end
+-- 
+--       -- steer right
+--       if btn(Btn.Right) then x += 1 end
+-- 
+--       -- move player
+--       y += min(4, at)
+--     end
+-- 
+--     if not canfall(x, y) then
+--       -- back to idle
+--       y = flr(y/8) * 8
+--       transition(idle)
+--     end
+--   end
+-- 
+--   -- jump state
+--   jump = function()
+--     sprite = sprite_walk2
+-- 
+--     -- move
+--     y += at-6
+--     if btn(Btn.Left) then x -= 2 end
+--     if btn(Btn.Right) then x += 2 end
+-- 
+--     -- back to idle
+--     if not btn(Btn.Up) or at > 7 then
+--       transition(idle)
+--     end
+--   end
+-- 
+--   -- initialize player state
+--   transition(idle)
+-- 
+--   return {
+--     update = function()
+--       -- make map wrap around
+--       x = x % 128
+-- 
+--       -- increment state clock
+--       at += 1
+-- 
+--       -- execute current state function
+--       state()
+--     end,
+-- 
+--     draw = function()
+--       -- draw the world
+--       -- celx, cely, sx, sy, celw, celh
+--       map(0, 0, 0, 0, 16, 16)
+-- 
+--       -- draw the player, use dir to mirror sprites
+--       local flip = dir == -1
+--       spr(sprite, x, y, 1, 1, flip)
+--     end,
+--   }
 end
 
 --
--- Player instance.
+-- Entities.
 --
 
 entities = {
-  Player(),
 }
 
 --
@@ -195,21 +196,21 @@ function _draw()
   for e in all(entities) do e.draw() end
 end
 
---
--- Util function.
---
-
-function canfall(px, py)
-  -- get the map tile under the player
-  local sprite = mget(
-    flr((px+4) / 8),
-    flr((py+8) / 8)
-  )
-
-  -- see if it's flagged as well
-  local can_collide = fget(sprite, 0)
-  return not can_collide
-end
+-- --
+-- -- Util function.
+-- --
+-- 
+-- function canfall(px, py)
+--   -- get the map tile under the player
+--   local sprite = mget(
+--     flr((px+4) / 8),
+--     flr((py+8) / 8)
+--   )
+-- 
+--   -- see if it's flagged as well
+--   local can_collide = fget(sprite, 0)
+--   return not can_collide
+-- end
 __gfx__
 00000000666666666666666666666666ccccccccccccccccc077cccc000000000000000000000000000000000000000000000000000000000000000000000000
 00000000aaaaaaaacaaaaaaaaaaaaaaccccccccccccc77cc0777777c000000000000000000000000000000000000000000000000000000000000000000000000
