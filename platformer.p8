@@ -98,15 +98,15 @@ function Player()
     sprite = sprite_walk1 + flr(at/2) % 2
 
     if not (btn(Btn.Left) or btn(Btn.Right)) then
-      state = idle
+      transition(idle)
     end
 
     if btn(Btn.Up) then
-      state = jump
+      transition(jump)
     end
 
     if canfall(x, y) then
-      state = fall
+      transition(fall)
     end
   end
 
@@ -128,7 +128,7 @@ function Player()
     if not canfall(x, y) then
       -- back to idle
       y = flr(y/8) * 8
-      state = idle
+      transition(idle)
     end
   end
 
@@ -143,12 +143,12 @@ function Player()
 
     -- back to idle
     if not btn(Btn.Up) or at > 7 then
-      state = idle
+      transition(idle)
     end
   end
 
   -- initialize player state
-  state = idle
+  transition(idle)
 
   return {
     update = function()
