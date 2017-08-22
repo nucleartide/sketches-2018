@@ -66,23 +66,26 @@ function Player()
 
   -- TODO: consider coroutines, don't want that single frame delay
 
---   -- idle state
---   idle = function()
---     sprite = sprite_idle
--- 
---     if btn(Btn.Left) or btn(Btn.Right) then
---       transition(walk)
---     end
--- 
---     if btn(Btn.Up) then
---       transition(jump)
---     end
--- 
---     if canfall(x, y) then
---       transition(fall)
---     end
---   end
--- 
+  -- idle state
+  idle = function()
+    sprite = sprite_idle
+
+    if btn(Btn.Left) or btn(Btn.Right) then
+      -- transition(walk)
+      -- return walk
+    end
+
+    if btn(Btn.Up) then
+      -- transition(jump)
+      -- return jump
+    end
+
+    if canfall(x, y) then
+      -- transition(fall)
+      -- return fall
+    end
+  end
+
 --   -- walk state
 --   walk = function()
 --     if btn(Btn.Left) then
@@ -151,29 +154,42 @@ function Player()
 -- 
 --   -- initialize player state
 --   transition(idle)
--- 
---   return {
---     update = function()
---       -- make map wrap around
---       x = x % 128
--- 
---       -- increment state clock
---       at += 1
--- 
---       -- execute current state function
---       state()
---     end,
--- 
---     draw = function()
---       -- draw the world
---       -- celx, cely, sx, sy, celw, celh
---       map(0, 0, 0, 0, 16, 16)
--- 
---       -- draw the player, use dir to mirror sprites
---       local flip = dir == -1
---       spr(sprite, x, y, 1, 1, flip)
---     end,
---   }
+
+  local update = function()
+    while true do
+      state = state()
+      if state == nil then return end
+    end
+  end
+
+  return {
+    old_update = function()
+      -- make map wrap around
+      -- x = x % 128
+
+      -- increment state clock
+      -- at += 1
+
+      -- execute current state function
+      -- state()
+    end,
+
+    draw = function()
+      coresume(co_update)
+    end,
+
+    update = function() end,
+
+    old_draw = function()
+      -- draw the world
+      -- celx, cely, sx, sy, celw, celh
+      map(0, 0, 0, 0, 16, 16)
+
+      -- draw the player, use dir to mirror sprites
+      -- local flip = dir == -1
+      -- spr(sprite, x, y, 1, 1, flip)
+    end,
+  }
 end
 
 --
@@ -181,6 +197,7 @@ end
 --
 
 entities = {
+  Player(),
 }
 
 --
@@ -188,12 +205,17 @@ entities = {
 --
 
 function _update()
-  for e in all(entities) do e.update() end
+  for e in all(entities) do
+    e.update()
+  end
 end
 
 function _draw()
   cls()
-  for e in all(entities) do e.draw() end
+
+  for e in all(entities) do
+    e.draw()
+  end
 end
 
 -- --
