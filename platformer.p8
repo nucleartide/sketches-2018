@@ -5,6 +5,10 @@ __lua__
 --
 -- run n' gun with rocket jumping instead of real jumping
 --
+-- platforming stuff:
+--   - conveyor belt
+--   - wall jumping
+--
 
 --
 -- Buttons.
@@ -20,56 +24,51 @@ Btn = {
 }
 
 --
--- Player state.
+-- Mini FSM framework. :o
 --
 
-PlayerState = {
-  Idle   = 0,
-  Walk   = 1, -- can aim
-  Midair = 2, -- can aim
-}
+function munpack(t, from, to)
+  from = from or 1
+  to = to or #t
+  if from > to then return end
+  return t[from], munpack(t, from+1, to)
+end
+
+function fsm(state, ...)
+  local args = ...
+
+  return cocreate(function()
+    while true do state = state(munpack(args)) end
+  end)
+end
+
+function msg(c, s)
+  if not c and s then print(s) end
+  return c
+end
 
 --
 -- Player class.
 --
 
 function Player()
-  -- x-position in pixels
-  local x = 20
 
-  -- y-position in pixels
-  local y = 64
+  --
+  -- Constants.
+  --
 
-  -- current sprite index
-  local sprite = 0
+  local SpriteIdle  = 17
+  local SpriteWalk1 = 18
+  local SpriteWalk2 = 19
 
-  -- notable sprite indices
-  local sprite_idle = 17
-  local sprite_walk1 = 18
-  local sprite_walk2 = 19
+  --
+  -- Idle state.
+  --
 
-  -- current direction
-  local dir = 0
-
-  -- number of frames spent in current state
-  local at = 0
-
-  -- player states
-  local idle
-  local walk
-  local aim
-  local midair
-  local state
-
-  -- state transition function
-  function transition(new_state)
-    at = 0
-    state = new_state
-  end
-
-  -- idle state
-  idle = function()
-    sprite = sprite_idle
+  local function idle(player)
+    -- sprite = sprite_idle
+    -- make map wrap around
+    -- x = x % 128
 
     if btn(Btn.Left) or btn(Btn.Right) then
       -- transition(walk)
@@ -81,11 +80,35 @@ function Player()
       -- return jump
     end
 
-    if canfall(x, y) then
+    -- if canfall(x, y) then
       -- transition(fall)
       -- return fall
-    end
+    -- end
+
+    yield()
+    return idle
   end
+
+  --
+  -- Create player FSM.
+  --
+
+  local co = fsm(idle, {
+    -- number of frames spent in current state
+    at = 0,
+
+    -- x-position in pixels
+    x = 20,
+
+    -- y-position in pixels
+    y = 64,
+
+    -- current sprite index
+    sprite = 0,
+
+    -- current direction
+    dir = 0,
+  })
 
 --   -- walk state
 --   walk = function()
@@ -155,33 +178,12 @@ function Player()
 -- 
 --   -- initialize player state
 --   transition(idle)
-
-  local update = function()
-    while true do
-      state = state()
-      if state == nil then return end
-    end
-  end
-
   return {
-    old_update = function()
-      -- make map wrap around
-      -- x = x % 128
-
-      -- increment state clock
-      -- at += 1
-
-      -- execute current state function
-      -- state()
+    update = function()
+      assert(msg(coresume(co)))
     end,
 
     draw = function()
-      coresume(co_update)
-    end,
-
-    update = function() end,
-
-    old_draw = function()
       -- draw the world
       -- celx, cely, sx, sy, celw, celh
       map(0, 0, 0, 0, 16, 16)
@@ -206,17 +208,12 @@ entities = {
 --
 
 function _update()
-  for e in all(entities) do
-    e.update()
-  end
+  for e in all(entities) do e.update() end
 end
 
 function _draw()
   cls()
-
-  for e in all(entities) do
-    e.draw()
-  end
+  for e in all(entities) do e.draw() end
 end
 
 -- --
