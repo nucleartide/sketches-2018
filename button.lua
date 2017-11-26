@@ -1,11 +1,11 @@
 
 local Button = {
   Left  = 0,
-  Right = 0,
-  Up    = 0,
-  Down  = 0,
-  O     = 0,
-  X     = 0,
+  Right = 1,
+  Up    = 2,
+  Down  = 3,
+  O     = 4,
+  X     = 5,
 }
 
 -- Test update.
