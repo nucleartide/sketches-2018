@@ -14,13 +14,4 @@ local function mode(m)
   poke(24364, map[m] or 0)
 end
 
--- Test update.
-function _update()
-end
-
--- Test draw.
-function _draw()
-  cls()
-end
-
 return mode
