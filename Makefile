@@ -1,4 +1,16 @@
 
+LUA = $(shell find . -name '*.lua')
+P8 = $(LUA:.lua=.p8)
+
+# Build test carts for all modules.
+all: $(P8)
+.PHONY: all
+
+# Delete carts in root directory only.
+clean:
+	@rm *.p8
+.PHONY: clean
+
 # Build test cart for module.
 %.p8: %.lua
 	@# Define some variables.
