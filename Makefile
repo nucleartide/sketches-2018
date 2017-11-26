@@ -1,6 +1,6 @@
 
 LUA = $(shell find . -name '*.lua')
-P8 = $(LUA:.lua=.p8)
+P8 = $(LUA:.lua=.p8.png)
 
 # Build test carts for all modules.
 all: $(P8)
@@ -8,11 +8,11 @@ all: $(P8)
 
 # Delete carts in root directory only.
 clean:
-	@rm *.p8
+	@rm *.p8.png
 .PHONY: clean
 
 # Build test cart for module.
-%.p8: %.lua
+%.p8.png: %.lua
 	@# Define some variables.
 	@# Example: `color.lua` becomes `color-test.lua`.
 	$(eval MODULE = $(^:.lua=))
@@ -31,6 +31,6 @@ clean:
 	@rm $(TEST_FILE)
 
 # Run test cart.
-test-%: %.p8
+test-%: %.p8.png
 	@open -n -a PICO-8 --args -run $(CURDIR)/$^
 .PHONY: test-%
