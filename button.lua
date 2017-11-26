@@ -17,4 +17,4 @@ function _draw()
   cls()
 end
 
-return Color
+return Button
