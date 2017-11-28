@@ -10,6 +10,6 @@ run: $(NAME).p8
 	@open -n -a PICO-8 --args -run $(CURDIR)/$^
 .PHONY: run
 
-watch:
+watch: run
 	@watch -i 100ms make $(NAME).p8 >/dev/null
 .PHONY: watch
