@@ -34,12 +34,19 @@ function munpack(t, from, to)
   return t[from], munpack(t, from+1, to)
 end
 
-function fsm(state, ...)
-  local args = ...
+-- fsm(idle, draw, {})
+function fsm(state, draw, ...)
+  local args = {...}
 
-  return cocreate(function()
+  local u = cocreate(function()
     while true do state = state(munpack(args)) end
   end)
+
+  local d = cocreate(function()
+    while true do draw(munpack(args)) end
+  end)
+
+  return u, d
 end
 
 function msg(c, s)
