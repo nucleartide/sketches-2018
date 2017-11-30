@@ -1,23 +1,18 @@
 
+local color = require('picokit/color')
+local fsm = require('fsm')
+local player = require('player')
+
+local entities = {}
+
 function _init()
-  color = require('picokit/color')
+  add(entities, player.new())
 end
 
 function _update()
 end
 
---
--- Entities.
---
-
-entities = {
-}
-
---
--- PICO-8 callbacks.
---
-
 function _draw()
   cls()
-  circfill(64, 64, 40, color.Pink)
+  circfill(64, 64, 40, color.pink)
 end
