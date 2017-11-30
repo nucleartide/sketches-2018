@@ -6,13 +6,15 @@ local player = require('player')
 local entities = {}
 
 function _init()
-  add(entities, player.new())
+  add(entities, player())
 end
 
 function _update()
+  for e in all(entities) do e.update() end
 end
 
 function _draw()
   cls()
-  circfill(64, 64, 40, color.pink)
+  -- sanity test: circfill(64, 64, 40, color.pink)
+  for e in all(entities) do e.draw() end
 end

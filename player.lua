@@ -18,7 +18,8 @@ local function draw()
 end
 
 local function new()
-  return fsm(idle, draw, {})
+  local u, d = fsm(idle, draw, {})
+  return { update = u, draw = d }
 end
 
 return new
