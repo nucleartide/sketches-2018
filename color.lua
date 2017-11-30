@@ -1,21 +1,21 @@
 
-local Color = {
-  Black      = 0,
-  DarkBlue   = 1,
-  DarkPurple = 2,
-  DarkGreen  = 3,
-  Brown      = 4,
-  DarkGray   = 5,
-  LightGray  = 6,
-  White      = 7,
-  Red        = 8,
-  Orange     = 9,
-  Yellow     = 10,
-  Green      = 11,
-  Blue       = 12,
-  Indigo     = 13,
-  Pink       = 14,
-  Peach      = 15,
+local color = {
+  black      = 0,
+  darkblue   = 1,
+  darkpurple = 2,
+  darkgreen  = 3,
+  brown      = 4,
+  darkgray   = 5,
+  lightgray  = 6,
+  white      = 7,
+  red        = 8,
+  orange     = 9,
+  yellow     = 10,
+  green      = 11,
+  blue       = 12,
+  indigo     = 13,
+  pink       = 14,
+  peach      = 15,
 }
 
-return Color
+return color
