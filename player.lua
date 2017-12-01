@@ -1,5 +1,6 @@
 
 local fsm = require('fsm')
+local color = require('picokit/color')
 
 local function idle()
   print('player')
@@ -15,6 +16,7 @@ local function fall()
 end
 
 local function draw()
+  circfill(64, 64, 40, color.pink)
 end
 
 local function new()

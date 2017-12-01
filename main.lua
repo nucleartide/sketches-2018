@@ -10,11 +10,11 @@ function _init()
 end
 
 function _update()
-  for e in all(entities) do e.update() end
+  for e in all(entities) do coresume(e.update) end
 end
 
 function _draw()
   cls()
   -- sanity test: circfill(64, 64, 40, color.pink)
-  for e in all(entities) do e.draw() end
+  for e in all(entities) do coresume(e.draw) end
 end
