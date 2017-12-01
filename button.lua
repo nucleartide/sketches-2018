@@ -1,11 +1,11 @@
 
-local Button = {
-  Left  = 0,
-  Right = 1,
-  Up    = 2,
-  Down  = 3,
-  O     = 4,
-  X     = 5,
+local button = {
+  left  = 0,
+  right = 1,
+  up    = 2,
+  down  = 3,
+  o     = 4,
+  x     = 5,
 }
 
-return Button
+return button
