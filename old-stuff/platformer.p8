@@ -74,26 +74,6 @@ function Player()
 
   local function idle(player)
     -- sprite = sprite_idle
-    -- make map wrap around
-    -- x = x % 128
-
-    if btn(Btn.Left) or btn(Btn.Right) then
-      -- transition(walk)
-      -- return walk
-    end
-
-    if btn(Btn.Up) then
-      -- transition(jump)
-      -- return jump
-    end
-
-    -- if canfall(x, y) then
-      -- transition(fall)
-      -- return fall
-    -- end
-
-    yield()
-    return idle
   end
 
   --
