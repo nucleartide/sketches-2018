@@ -1,4 +1,8 @@
 
+--
+-- badass fsm mini-framework
+--
+
 local function munpack(t, from, to)
   from = from or 1
   to = to or #t
@@ -7,17 +11,9 @@ local function munpack(t, from, to)
 end
 
 local function fsm(initial_state, draw, ...)
-  local state = initial_state
   local args = {...}
-
-  local u = cocreate(function()
-    while true do state = state(munpack(args)) end
-  end)
-
-  local d = cocreate(function()
-    while true do draw(munpack(args)) end
-  end)
-
+  local u = cocreate(function() initial_state(munpack(args)) end)
+  local d = cocreate(function() draw(munpack(args)) end)
   return u, d
 end
 
