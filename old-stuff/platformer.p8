@@ -3,58 +3,6 @@ version 8
 __lua__
 
 --
--- run n' gun with rocket jumping instead of real jumping
---
--- platforming stuff:
---   - conveyor belt
---   - wall jumping
---
-
---
--- Buttons.
---
-
-Btn = {
-  Left  = 0,
-  Right = 1,
-  Up    = 2,
-  Down  = 3,
-  Z     = 4,
-  X     = 5,
-}
-
---
--- Mini FSM framework. :o
---
-
-function munpack(t, from, to)
-  from = from or 1
-  to = to or #t
-  if from > to then return end
-  return t[from], munpack(t, from+1, to)
-end
-
--- fsm(idle, draw, {})
-function fsm(state, draw, ...)
-  local args = {...}
-
-  local u = cocreate(function()
-    while true do state = state(munpack(args)) end
-  end)
-
-  local d = cocreate(function()
-    while true do draw(munpack(args)) end
-  end)
-
-  return u, d
-end
-
-function msg(c, s)
-  if not c and s then print(s) end
-  return c
-end
-
---
 -- Player class.
 --
 
@@ -181,43 +129,6 @@ function Player()
     end,
   }
 end
-
---
--- Entities.
---
-
-entities = {
-  Player(),
-}
-
---
--- PICO-8 callbacks.
---
-
-function _update()
-  for e in all(entities) do e.update() end
-end
-
-function _draw()
-  cls()
-  for e in all(entities) do e.draw() end
-end
-
--- --
--- -- Util function.
--- --
--- 
--- function canfall(px, py)
---   -- get the map tile under the player
---   local sprite = mget(
---     flr((px+4) / 8),
---     flr((py+8) / 8)
---   )
--- 
---   -- see if it's flagged as well
---   local can_collide = fget(sprite, 0)
---   return not can_collide
--- end
 __gfx__
 00000000666666666666666666666666ccccccccccccccccc077cccc000000000000000000000000000000000000000000000000000000000000000000000000
 00000000aaaaaaaacaaaaaaaaaaaaaaccccccccccccc77cc0777777c000000000000000000000000000000000000000000000000000000000000000000000000
