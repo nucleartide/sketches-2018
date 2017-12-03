@@ -7,7 +7,7 @@ SRC_ONLY = $(filter-out %_test.lua,$(LUA))
 
 # Can `require` modules or individual files.
 $(NAME).p8: $(SRC_ONLY) $(CURDIR)/picokit/old-stuff/platformer.p8
-	@p8tool build $@ --lua main.lua \
+	@p8tool build $@ --lua $(NAME).lua \
 		--gfx $(CURDIR)/picokit/old-stuff/platformer.p8 \
 		--map $(CURDIR)/picokit/old-stuff/platformer.p8 \
 		--lua-path $(CURDIR)/?/init.lua\;$(CURDIR)/?.lua \
