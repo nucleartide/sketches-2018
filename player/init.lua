@@ -27,6 +27,7 @@ local function data()
     y = 64,
 
     -- number of frames spent in current state
+    -- range is [0, 30), see next.lua
     at = 0,
 
     -- current sprite index

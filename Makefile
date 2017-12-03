@@ -14,7 +14,7 @@ $(NAME).p8: $(SRC_ONLY) $(CURDIR)/picokit/old-stuff/platformer.p8
 		--gff $(CURDIR)/picokit/old-stuff/platformer.p8
 
 run: $(NAME).p8
-	@open -n -a PICO-8 --args -run $(CURDIR)/$^
+	@open -a PICO-8 --args -run $(CURDIR)/$^
 .PHONY: run
 
 old-shit:
@@ -22,5 +22,5 @@ old-shit:
 .PHONY: run
 
 watch: run
-	@watch -i 100ms make $(NAME).p8 >/dev/null
+	@watch -i 100ms --halt make $(NAME).p8 >/dev/null
 .PHONY: watch
