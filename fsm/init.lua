@@ -10,6 +10,11 @@ local function munpack(t, from, to)
   return t[from], munpack(t, from+1, to)
 end
 
+local function msg(c, s)
+  if not c and s then print(s) end
+  return c
+end
+
 local function fsm(initial_state, draw, ...)
   local args = {...}
   local u = cocreate(function() initial_state(munpack(args)) end)
@@ -17,4 +22,7 @@ local function fsm(initial_state, draw, ...)
   return u, d
 end
 
-return fsm
+return {
+  msg = msg,
+  fsm = fsm,
+}
