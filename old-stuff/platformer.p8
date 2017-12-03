@@ -1,57 +1,6 @@
 pico-8 cartridge // http://www.pico-8.com
 version 14
 __lua__
-
---
--- player class.
---
-
-function player()
-
---   -- walk state
---   walk = function()
---     if btn(btn.left) then
---       dir = -1
---     end
--- 
---     if btn(btn.right) then
---       dir = 1
---     end
--- 
---     -- gradually increase per-frame movement to 2
---     x += dir * min(at, 2)
--- 
---     -- change sprite every 2 frames
---     sprite = sprite_walk1 + flr(at/2) % 2
--- 
---     if not (btn(btn.left) or btn(btn.right)) then
---       transition(idle)
---     end
--- 
---     if btn(btn.up) then
---       transition(jump)
---     end
--- 
---     if canfall(x, y) then
---       transition(fall)
---     end
---   end
--- 
---   -- jump state
---   jump = function()
---     sprite = sprite_walk2
--- 
---     -- move
---     y += at-6
---     if btn(btn.left) then x -= 2 end
---     if btn(btn.right) then x += 2 end
--- 
---     -- back to idle
---     if not btn(btn.up) or at > 7 then
---       transition(idle)
---     end
---   end
-end
 __gfx__
 00000000666666666666666666666666ccccccccccccccccc077cccc000000000000000000000000000000000000000000000000000000000000000000000000
 00000000aaaaaaaacaaaaaaaaaaaaaaccccccccccccc77cc0777777c000000000000000000000000000000000000000000000000000000000000000000000000
