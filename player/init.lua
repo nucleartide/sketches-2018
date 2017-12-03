@@ -50,6 +50,7 @@ local function draw(data)
   spr(spritewalk1, data.x, data.y)
   print('x:' .. data.x)
   print('at:' .. data.at)
+  print('fget of 0:' .. (fget(0,0) and 'true' or 'false'))
   yield()
   return draw(data)
 end
