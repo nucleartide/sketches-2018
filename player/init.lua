@@ -4,7 +4,7 @@
 --
 
 local fsm = require('fsm')
-local idle = require('player/idle')
+local state = require('player/state')
 
 --
 -- Constants.
@@ -43,7 +43,7 @@ end
 
 local function draw(data)
   -- TODO: flip sprite?
-  spr(spritewalk1, state.x, state.y)
+  spr(spritewalk1, data.x, data.y)
   yield()
   return draw(data)
 end
@@ -54,7 +54,7 @@ end
 
 return {
   new = function()
-    local u, d = fsm.new(idle, draw, data())
+    local u, d = fsm.new(state, draw, data())
     return { update = u, draw = d }
   end,
 }

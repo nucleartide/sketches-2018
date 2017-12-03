@@ -2,6 +2,179 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 package={loaded={},_c={}}
+package._c["player/state"]=function()
+
+local canfall = require('player/canfall')
+local button = require('picokit/button')
+
+local fall
+local idle
+local jump
+local walk
+
+fall = function(data)
+  printh("evaluating fall data", "log.txt")
+
+  -- advance data
+  data.at += 1
+
+  -- select new sprite
+  data.sprite = spritewalk2
+
+  -- advance y position
+  data.y += min(4, data.at)
+
+  -- steer left or right
+  if btn(button.left) then data.x -= 1 end
+  if btn(button.right) then data.x += 1 end
+
+  -- stay in current data
+  yield()
+
+  if not canfall(data.x, data.y) then
+    -- put sprite on top of tile below
+    data.y = flr(data.y/8) * 8
+    return idle(data)
+  end
+
+  return fall(data)
+end
+
+idle = function(data)
+  -- advance data
+  data.at += 1
+
+  -- world wraps around horizontally
+  data.x = data.x % 128
+
+  -- and vertically...
+  data.y = data.y % 128
+
+--     if btn(button.left) or btn(button.right) then
+--       return walk
+--     end
+-- 
+--     if btn(button.up) then
+--       return jump
+--     end
+
+  if canfall(data.x, data.y) then
+    data.at = 0
+    return fall(data)
+  end
+
+  -- stay in current data
+  yield()
+  return idle(data)
+end
+
+jump = function(state)
+  -- advance state
+  state.at += 1
+
+  state.sprite = spritewalk2
+
+  -- move
+  state.y += state.at - 6
+  if btn(button.left) then state.x -= 2 end
+  if btn(button.right) then state.x += 2 end
+
+  if not btn(button.up) or state.at > 7 then
+    return idle(state)
+  end
+
+  -- stay in current state
+  yield()
+  return jump(state)
+end
+
+walk = function(state)
+  -- advance state
+  state.at += 1
+
+  if btn(button.left) then state.dir = -1 end
+  if btn(button.right) then state.dir = 1 end
+  state.x += state.dir * min(state.at, 2)
+
+  state.sprite = spritewalk1 + flr(at/2)%2
+  yield()
+
+  if not (btn(button.left) or btn(button.right)) then
+    return idle(state)
+  end
+
+  if btn(button.up) then
+    return jump(state)
+  end
+
+  if canfall(state.x, state.y) then
+    return fall(state)
+  end
+
+  -- stay in current state
+  return walk(state)
+end
+
+--
+-- Export initial state.
+--
+
+return idle
+end
+package._c["fsm"]=function()
+
+--
+-- badass fsm mini-framework
+--
+
+local function munpack(t, from, to)
+  from = from or 1
+  to = to or #t
+  if from > to then return end
+  return t[from], munpack(t, from+1, to)
+end
+
+local function msg(c, s)
+  if not c and s then print(s) end
+  return c
+end
+
+local function fsm(initial_state, draw, ...)
+  local args = {...}
+  local u = cocreate(function() initial_state(munpack(args)) end)
+  local d = cocreate(function() draw(munpack(args)) end)
+  return u, d
+end
+
+return {
+  msg = msg,
+  new = fsm,
+}
+end
+package._c["player/canfall"]=function()
+
+return function(px, py)
+  -- get the sprite number of the tile under the player
+  local tile = mget(flr((px+4)/8), flr((py+8)/8))
+  -- what if there's no sprite at that location?
+
+  local can_collide = fget(tile, 0)
+  return not can_collide
+end
+end
+package._c["picokit/button"]=function()
+
+local button = {
+  left  = 0,
+  right = 1,
+  up    = 2,
+  down  = 3,
+  o     = 4,
+  x     = 5,
+}
+
+return button
+end
 package._c["player"]=function()
 
 --
@@ -9,7 +182,7 @@ package._c["player"]=function()
 --
 
 local fsm = require('fsm')
-local idle = require('player/idle')
+local state = require('player/state')
 
 --
 -- Constants.
@@ -48,7 +221,7 @@ end
 
 local function draw(data)
   -- TODO: flip sprite?
-  spr(spritewalk1, state.x, state.y)
+  spr(spritewalk1, data.x, data.y)
   yield()
   return draw(data)
 end
@@ -59,70 +232,10 @@ end
 
 return {
   new = function()
-    local u, d = fsm.new(idle, draw, data())
+    local u, d = fsm.new(state, draw, data())
     return { update = u, draw = d }
   end,
 }
-end
-package._c["fsm"]=function()
-
---
--- badass fsm mini-framework
---
-
-local function munpack(t, from, to)
-  from = from or 1
-  to = to or #t
-  if from > to then return end
-  return t[from], munpack(t, from+1, to)
-end
-
-local function msg(c, s)
-  if not c and s then print(s) end
-  return c
-end
-
-local function fsm(initial_state, draw, ...)
-  local args = {...}
-  local u = cocreate(function() initial_state(munpack(args)) end)
-  local d = cocreate(function() draw(munpack(args)) end)
-  return u, d
-end
-
-return {
-  msg = msg,
-  new = fsm,
-}
-end
-package._c["player/idle"]=function()
-
-return function(state)
-  -- advance state
-  state.at += 1
-
-  -- world wraps around horizontally
-  state.x = state.x % 128
-
-  -- and vertically...
-  state.y = state.y % 128
-
---     if btn(button.left) or btn(button.right) then
---       return walk
---     end
--- 
---     if btn(button.up) then
---       return jump
---     end
-
-  if canfall(state.x, state.y) then
-    state.at = 0
-    return fall(state)
-  end
-
-  -- stay in current state
-  yield()
-  return idle(state)
-end
 end
 function require(p)
 local l=package.loaded
