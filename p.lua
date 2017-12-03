@@ -7,7 +7,7 @@ function _init()
   add(entities, player.new())
 end
 
-function _update()
+function _update60()
   for e in all(entities) do assert(fsm.msg(coresume(e.update))) end
 end
 
