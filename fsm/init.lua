@@ -15,14 +15,14 @@ local function msg(c, s)
   return c
 end
 
-local function fsm(initial_state, draw, ...)
+local function new(state, draw, ...)
   local args = {...}
-  local u = cocreate(function() initial_state(munpack(args)) end)
+  local u = cocreate(function() state(munpack(args)) end)
   local d = cocreate(function() draw(munpack(args)) end)
   return u, d
 end
 
 return {
   msg = msg,
-  new = fsm,
+  new = new,
 }

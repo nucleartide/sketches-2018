@@ -1,67 +1,60 @@
 
 local canfall = require('player/canfall')
 local button = require('picokit/button')
+local before = require('picokit/before')
+local transition = require('picokit/transition')
 
 local fall
 local idle
 local jump
 local walk
 
-fall = function(data)
-  printh("evaluating fall data", "log.txt")
+--
+-- Idle state.
+--
 
-  -- advance data
-  data.at += 1
+idle = before(function(data)
+  if canfall(data.x, data.y) then
+    return transition(fall, data)
+  end
 
-  -- select new sprite
-  data.sprite = spritewalk2
+  if btn(button.left) or btn(button.right) then
+    return transition(walk, data)
+  end
 
-  -- advance y position
-  data.y += min(4, data.at)
+  yield()
+  return transition(idle, data)
+end)
 
+--
+-- Fall state.
+--
+
+fall = before(function(data)
   -- steer left or right
   if btn(button.left) then data.x -= 1 end
   if btn(button.right) then data.x += 1 end
 
-  -- stay in current data
+  -- fall
+  data.y += min(4, data.at)
+
+  -- wrap around vertically
+  data.y = data.y % 128
+
   yield()
 
   if not canfall(data.x, data.y) then
     -- put sprite on top of tile below
     data.y = flr(data.y/8) * 8
-    return idle(data)
+    return transition(idle, data)
   end
 
-  return fall(data)
-end
+  return transition(fall, data)
+end)
 
-idle = function(data)
-  -- advance data
-  data.at += 1
-
-  -- world wraps around horizontally
-  data.x = data.x % 128
-
-  -- and vertically...
-  data.y = data.y % 128
-
---     if btn(button.left) or btn(button.right) then
---       return walk
---     end
--- 
---     if btn(button.up) then
---       return jump
---     end
-
-  if canfall(data.x, data.y) then
-    data.at = 0
-    return fall(data)
-  end
-
-  -- stay in current data
-  yield()
-  return idle(data)
-end
+--
+-- Jump state.
+--
 
 jump = function(state)
   -- advance state
@@ -83,31 +76,27 @@ jump = function(state)
   return jump(state)
 end
 
-walk = function(state)
-  -- advance state
-  state.at += 1
+--
+-- Walk state.
+--
 
-  if btn(button.left) then state.dir = -1 end
-  if btn(button.right) then state.dir = 1 end
-  state.x += state.dir * min(state.at, 2)
+walk = function(data)
+  -- check for fall
+  if canfall(data.x, data.y) then return transition(fall, data) end
 
-  state.sprite = spritewalk1 + flr(at/2)%2
-  yield()
-
+  -- check for idleness
   if not (btn(button.left) or btn(button.right)) then
-    return idle(state)
+    return transition(idle, data)
   end
 
-  if btn(button.up) then
-    return jump(state)
-  end
+  -- if not falling, move player forward or backward
+  if btn(button.left) then data.dir = -1 end
+  if btn(button.right) then data.dir = 1 end
+  data.x += data.dir * min(data.at, 2)
+  data.x = data.x % 128
 
-  if canfall(state.x, state.y) then
-    return fall(state)
-  end
-
-  -- stay in current state
-  return walk(state)
+  yield()
+  return transition(walk, data)
 end
 
 --

@@ -21,7 +21,7 @@ local spritewalk3 = 19
 local function data()
   return {
     -- x-position in pixels
-    x = 20,
+    x = 10,
 
     -- y-position in pixels
     y = 64,
@@ -34,6 +34,9 @@ local function data()
 
     -- current direction
     dir = 0,
+
+    -- current state
+    state = state,
   }
 end
 
@@ -44,6 +47,8 @@ end
 local function draw(data)
   -- TODO: flip sprite?
   spr(spritewalk1, data.x, data.y)
+  print('x:' .. data.x)
+  print('at:' .. data.at)
   yield()
   return draw(data)
 end
