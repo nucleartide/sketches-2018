@@ -5,12 +5,13 @@ SRC_ONLY = $(filter-out %_test.lua,$(LUA))
 
 # TODO: before shipping, you should check stat(0) for memory leaks
 
+# Can `require` modules or individual files.
 $(NAME).p8: $(SRC_ONLY) $(CURDIR)/picokit/old-stuff/platformer.p8
 	@p8tool build $@ --lua main.lua \
 		--gfx $(CURDIR)/picokit/old-stuff/platformer.p8 \
 		--map $(CURDIR)/picokit/old-stuff/platformer.p8 \
-		--gff $(CURDIR)/picokit/old-stuff/platformer.p8 \
-		--lua-path $(CURDIR)/?.lua;$(CURDIR)/?/init.lua
+		--lua-path $(CURDIR)/?/init.lua\;$(CURDIR)/?.lua \
+		--gff $(CURDIR)/picokit/old-stuff/platformer.p8
 
 run: $(NAME).p8
 	@open -n -a PICO-8 --args -run $(CURDIR)/$^

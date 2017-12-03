@@ -24,5 +24,5 @@ end
 
 return {
   msg = msg,
-  fsm = fsm,
+  new = fsm,
 }

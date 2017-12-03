@@ -2,11 +2,127 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 package={loaded={},_c={}}
-package._c["player/player"]=function()
-require('player/foo/bar')
+package._c["player/idle"]=function()
+
+return function(state)
+  -- advance state
+  state.at += 1
+
+  -- world wraps around horizontally
+  state.x = state.x % 128
+
+  -- and vertically...
+  state.y = state.y % 128
+
+--     if btn(button.left) or btn(button.right) then
+--       return walk
+--     end
+-- 
+--     if btn(button.up) then
+--       return jump
+--     end
+
+  if canfall(state.x, state.y) then
+    state.at = 0
+    return fall(state)
+  end
+
+  -- stay in current state
+  yield()
+  return idle(state)
 end
-package._c["player/foo/bar"]=function()
-print('in player foo bar')
+end
+package._c["fsm"]=function()
+
+--
+-- badass fsm mini-framework
+--
+
+local function munpack(t, from, to)
+  from = from or 1
+  to = to or #t
+  if from > to then return end
+  return t[from], munpack(t, from+1, to)
+end
+
+local function msg(c, s)
+  if not c and s then print(s) end
+  return c
+end
+
+local function fsm(initial_state, draw, ...)
+  local args = {...}
+  local u = cocreate(function() initial_state(munpack(args)) end)
+  local d = cocreate(function() draw(munpack(args)) end)
+  return u, d
+end
+
+return {
+  msg = msg,
+  new = fsm,
+}
+end
+package._c["player"]=function()
+
+--
+-- Module dependencies.
+--
+
+local fsm = require('fsm')
+local idle = require('player/idle')
+
+--
+-- Constants.
+--
+
+local spritewalk1 = 17
+local spritewalk2 = 18
+local spritewalk3 = 19
+
+--
+-- Player data type.
+--
+
+local function data()
+  return {
+    -- x-position in pixels
+    x = 20,
+
+    -- y-position in pixels
+    y = 64,
+
+    -- number of frames spent in current state
+    at = 0,
+
+    -- current sprite index
+    sprite = 0,
+
+    -- current direction
+    dir = 0,
+  }
+end
+
+--
+-- Player draw function.
+--
+
+local function draw(data)
+  -- TODO: flip sprite?
+  spr(spritewalk1, state.x, state.y)
+  yield()
+  return draw(data)
+end
+
+--
+-- Export constructor.
+--
+
+return {
+  new = function()
+    local u, d = fsm.new(idle, draw, data())
+    return { update = u, draw = d }
+  end,
+}
 end
 function require(p)
 local l=package.loaded
@@ -15,27 +131,23 @@ if (l[p]==nil) l[p]=true
 return l[p]
 end
 
--- local color = require('picokit/color')
--- local fsm = require('fsm')
--- local player = require('player')
--- local msg = require('util').msg
--- local entities = {}
-
-local player = require('player/player')
+local player = require('player')
+local fsm = require('fsm')
+local entities = {}
 
 function _init()
-  -- add(entities, player())
+  add(entities, player.new())
 end
 
 function _update()
-  for e in all(entities) do assert(msg(coresume(e.update))) end
+  for e in all(entities) do assert(fsm.msg(coresume(e.update))) end
 end
 
 function _draw()
   cls()
+  map(0, 0, 0, 0, 16, 16) -- celx, cely, sx, sy, celw, celh
+  for e in all(entities) do assert(fsm.msg(coresume(e.draw))) end
   print(stat(0))
-  -- sanity test: circfill(64, 64, 40, color.pink)
-  for e in all(entities) do assert(msg(coresume(e.draw))) end
 end
 __gfx__
 00000000666666666666666666666666ccccccccccccccccc077cccc000000000000000000000000000000000000000000000000000000000000000000000000

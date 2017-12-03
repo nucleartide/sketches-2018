@@ -3,7 +3,7 @@
 -- Module dependencies.
 --
 
-local fsm = require('util/fsm')
+local fsm = require('fsm')
 local idle = require('player/idle')
 
 --
@@ -52,7 +52,9 @@ end
 -- Export constructor.
 --
 
-return function()
-  local u, d = fsm(idle, draw, data())
-  return { update = u, draw = d }
-end
+return {
+  new = function()
+    local u, d = fsm.new(idle, draw, data())
+    return { update = u, draw = d }
+  end,
+}
