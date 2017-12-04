@@ -91,6 +91,9 @@ end
 --
 
 walk = function(data)
+  -- Speed multiplier.
+  local Speed = 0.5
+
   -- Transition to fall if needed.
   if canfall(data.x, data.y) then
     return next(fall, data)
@@ -105,8 +108,8 @@ walk = function(data)
   end
 
   -- Move player forward or backward
-  if btn(button.left) then data.dir = -1 end
-  if btn(button.right) then data.dir = 1 end
+  if btn(button.left) then data.dir = -Speed end
+  if btn(button.right) then data.dir = Speed end
   data.x += data.dir * min(data.at, 2)
   data.x = data.x % 128
 

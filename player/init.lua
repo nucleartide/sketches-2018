@@ -47,7 +47,7 @@ end
 
 local function draw(data)
   -- TODO: flip sprite?
-  spr(spritewalk1, data.x, data.y)
+  spr(spritewalk1, flr(data.x), flr(data.y))
   print('x:' .. data.x)
   print('at:' .. data.at)
   print('fget of 0:' .. (fget(0,0) and 'true' or 'false'))
