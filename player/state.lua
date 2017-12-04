@@ -18,6 +18,9 @@ idle = function(data)
     return next(fall, data)
   end
 
+  -- Jump.
+  if btn(button.o) then return next(jump, data) end
+
   -- Walk.
   if btn(button.left) or btn(button.right) then
     return next(walk, data)
@@ -57,27 +60,30 @@ fall = function(data)
 end
 
 --
--- TODO: Jump state.
+-- Jump state.
 --
 
-jump = function(state)
-  -- advance state
-  state.at += 1
+jump = function(data)
+  -- Number of frames to remain in 'jump' state.
+  local N = 6
 
-  state.sprite = spritewalk2
-
-  -- move
-  state.y += state.at - 6
-  if btn(button.left) then state.x -= 2 end
-  if btn(button.right) then state.x += 2 end
-
-  if not btn(button.up) or state.at > 7 then
-    return idle(state)
+  -- Transition to idle if condition is met.
+  if not btn(button.o) or data.at > N then
+    return next(idle, data)
   end
 
-  -- stay in current state
+  -- Steer left or right.
+  if btn(button.left) then data.x -= 1 end
+  if btn(button.right) then data.x += 1 end
+
+  -- Move.
+  data.y += data.at - N
+
+  -- End of frame.
   yield()
-  return jump(state)
+
+  -- Continue.
+  return next(jump, data)
 end
 
 --
@@ -89,6 +95,9 @@ walk = function(data)
   if canfall(data.x, data.y) then
     return next(fall, data)
   end
+
+  -- Jump.
+  if btn(button.o) then return next(jump, data) end
 
   -- Transition to idle if needed.
   if not (btn(button.left) or btn(button.right)) then
