@@ -15,11 +15,15 @@ local function msg(c, s)
   return c
 end
 
+--
+-- TODO: Rename to actor.
+--
+
 local function new(state, draw, ...)
   local args = {...}
   local u = cocreate(function() state(munpack(args)) end)
   local d = cocreate(function() draw(munpack(args)) end)
-  return u, d
+  return { update = u, draw = d }
 end
 
 return {

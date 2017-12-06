@@ -19,7 +19,7 @@ idle = function(data)
   end
 
   -- Jump.
-  if btn(button.o) then return next(jump, data) end
+  if btnp(button.o) then return next(jump, data) end
 
   -- Walk.
   if btn(button.left) or btn(button.right) then
@@ -67,8 +67,11 @@ jump = function(data)
   -- Number of frames to remain in 'jump' state.
   local N = 6
 
+  -- Speed multiplier.
+  local Speed = 0.5
+
   -- Transition to idle if condition is met.
-  if not btn(button.o) or data.at > N then
+  if data.at > N then
     return next(idle, data)
   end
 
@@ -77,7 +80,7 @@ jump = function(data)
   if btn(button.right) then data.x += 1 end
 
   -- Move.
-  data.y += data.at - N
+  data.y += (data.at - N) * Speed
 
   -- End of frame.
   yield()
@@ -100,7 +103,7 @@ walk = function(data)
   end
 
   -- Jump.
-  if btn(button.o) then return next(jump, data) end
+  if btnp(button.o) then return next(jump, data) end
 
   -- Transition to idle if needed.
   if not (btn(button.left) or btn(button.right)) then
