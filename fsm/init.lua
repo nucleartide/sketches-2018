@@ -19,11 +19,17 @@ end
 -- TODO: Rename to actor.
 --
 
-local function new(state, draw, ...)
-  local args = {...}
-  local u = cocreate(function() state(munpack(args)) end)
-  local d = cocreate(function() draw(munpack(args)) end)
-  return { update = u, draw = d }
+local function new(opts)
+  local u = opts.update
+  local d = opts.draw
+
+  assert(type(u) == 'function')
+  assert(type(d) == 'function')
+
+  return {
+    update = cocreate(function() u(opts.state) end),
+    draw = cocreate(function() u(opts.state) end),
+  }
 end
 
 return {

@@ -3,7 +3,7 @@ function reset()
 end
 
 function _init()
-  ticks=0 -- frame counter, can overflow though?
+  ticks = 0 -- frame counter, can overflow though?
 end
 
 function _update60()

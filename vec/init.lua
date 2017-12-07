@@ -25,7 +25,7 @@ local function normal(v)
 end
 
 --
---
+-- Export functions.
 --
 
 return {
