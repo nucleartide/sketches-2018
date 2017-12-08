@@ -49,6 +49,7 @@ end
 --
 
 local function cam_pos(c)
+  -- TODO: bad for memory
   local shake = vec(0,0)
   if v.shake_remaining > 0 then
     shake.x = rnd(v.shake_force) - v.shake_force/2
@@ -144,6 +145,7 @@ return {
     -- infinite update :: (state) => ∞
     -- infinite draw :: (state) => ∞
 
+    -- TODO: need to expose state
     -- return actor.new{ update = update, state = data() }
   end,
 }
