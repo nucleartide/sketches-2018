@@ -7,6 +7,7 @@ local function new(x, y)
     x = x,
     y = y,
 
+    -- velocity (can be negative)
     dx = 0,
     dy = 0,
 
@@ -18,6 +19,7 @@ local function new(x, y)
 
     jump_speed = -1.75, -- jump velocity
     acc = 0.05, -- acceleration
+    dcc = 0.08, -- deceleration
     air_dcc = 1, -- air deceleration
     grav = 0.15,
 
@@ -98,9 +100,27 @@ local function update(p)
   local br = btn(button.right)
 
   -- Move left or right.
+  if bl then
+    p.dx -= p.acc
+    br = false -- handle double press
+  elseif br then
+    p.dx += p.acc
+  else -- neither left/right
+    if p.grounded then
+      p.dx *= p.dcc -- dcc is 0.8, this is good for smoothly slowing down
+    else
+      p.dx *= p.air_dcc
+    end
+  end
 
   yield()
   return update(p)
+end
+
+local function draw(p)
+
+  yield()
+  return draw(p)
 end
 
 return {
