@@ -92,6 +92,30 @@ local function set_anim(p, anim)
   p.animtick = a.ticks
 end
 
+--
+-- check if pushing into side tile and resolve.
+-- requires self.dx,self.x,self.y,self.w and 
+-- assumes tile flag 0 == solid
+-- assumes sprite size of 8x8
+--
+
+local function collide_side(p)
+  local offset = p.w/3 -- 2.67?
+
+  for i=-offset,offset,2 do -- TODO: -2.67,2.67? Not really accurate.
+    mget()
+
+    if then
+    end
+
+    if then
+    end
+  end
+
+  -- Didn't hit a solid tile.
+  return false
+end
+
 local function update(p)
   -- TODO: Kill enemies.
 
