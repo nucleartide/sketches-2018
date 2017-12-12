@@ -93,26 +93,33 @@ local function set_anim(p, anim)
 end
 
 local function update(p)
-  -- TODO: kill enemies
+  -- TODO: Kill enemies.
 
-  -- Track button presses.
+  -- 1. Track button presses. Left key takes precedence.
   local bl = btn(button.left)
-  local br = btn(button.right)
+  local br
+  if bl then br = false else br = btn(button.right) end
 
-  -- Move left or right.
+  -- 2. Move left or right.
   if bl then
     p.dx -= p.acc
-    br = false -- handle double press
   elseif br then
     p.dx += p.acc
-  else -- neither left/right
+  else
     if p.grounded then
-      p.dx *= p.dcc -- dcc is 0.8, this is good for smoothly slowing down
+      p.dx *= p.dcc -- As of this writing, p.dcc is 0.8.
     else
-      p.dx *= p.air_dcc
+      p.dx += p.air_dcc
     end
   end
 
+  -- 3. Limit walk speed.
+  p.dx = mid(-p.max_dx, p.dx, p.max_dx)
+
+  -- 4. Move horizontally.
+  p.x += p.dx
+
+  -- End of frame.
   yield()
   return update(p)
 end
