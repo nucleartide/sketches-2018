@@ -1,0 +1,2 @@
+# Ignore .p8 files, but allow .p8.png files.
+*.p8
