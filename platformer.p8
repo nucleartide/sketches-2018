@@ -472,8 +472,8 @@ function _init()
  entities = {
   actor(
    player.update,
-   player_draw,
-   player()
+   player.draw,
+   player.new()
   ),
   
   -- ...
@@ -487,7 +487,7 @@ function _update60()
 end
 
 function _draw()
- cls(color.black)
+ cls()
  
  for e in all(entities) do
   assert(coresume(e.draw))
@@ -525,20 +525,19 @@ color = {
 -- vec.
 --
 
-function vec(x,y)
- return {
-  x=x,
-  y=y,
- }
+vec = {}
+
+vec.new = function(x,y)
+ return { x=x, y=y }
 end
 
-function vec_len(v)
+vec.len = function(v)
  return sqrt(v.x^2 + v.y^2)
 end
 
-function vec_norm(v)
- local l = vec_len(v)
- return vec(v.x/l, v.y/l), l
+vec.norm = function(v)
+ local l = vec.len(v)
+ return vec.new(v.x/l, v.y/l), l
 end
 -->8
 
@@ -624,52 +623,33 @@ player.new = function(x,y)
  return {
   x=x,
   y=y,
-  
   dx=0,
   dy=0,
-  
   w=8,
   h=8,
-  
-  -- max x speed
   max_dx=1,
-  
-  -- max y speed
   max_dy=2,
-  
   jump_speed=-1.75,
-  
-  -- acceleration
   acc=0.05,
-  
-  -- deceleration
   dcc=0.8,
-
   air_dcc=1,
   grav=0.15,
-  
-  -- pressed this frame
+  curanim="walk",
+  curframe=1,
+  animtick=0,
+  flipx=false,
   jump_is_pressed=false,
-  
   jump_is_down=false,
-
-  -- # of frames in down state
   ticks_down=0,
-  
   jump_hold_time=0,
   min_jump_press=5,
   max_jump_press=15,
   jump_btn_released=true,
   airtime=0,
-  
-  curanim="walk",
-  curframe=1,
-  animtick=0,
-  flipx=false,
  }
 end
 
-player.udpate = function(state)
+player.update = function(state)
  yield()
  return player.update(state)
 end
@@ -683,11 +663,16 @@ end
 --
 -- actor.
 --
--- requires update, draw, and
--- state.
+-- requires:
+--
+--  1. update fn
+--  2. draw fn
+--  3. state
 --
 
-function actor(u,d,s) 
+actor = {}
+
+actor.new = function(u,d,s) 
  return {
   update = cocreate(function()
    return u(s)
