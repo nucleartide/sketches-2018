@@ -105,27 +105,9 @@ __lua__
 --make the player
 function m_player(x,y)
 
-	--todo: refactor with m_vec.
 	local p=
 	{
-		x=x,
-		y=y,
-
-		dx=0,
-		dy=0,
-
-		w=8,
-		h=8,
-		
-		max_dx=1,--max x speed
-		max_dy=2,--max y speed
-
-		jump_speed=-1.75,--jump veloclity
-		acc=0.05,--acceleration
-		dcc=0.8,--decceleration
-		air_dcc=1,--air decceleration
-		grav=0.15,
-		
+	
 		--helper for more complex
 		--button press tracking.
 		--todo: generalize button index.
@@ -153,46 +135,6 @@ function m_player(x,y)
 			ticks_down=0,--how long down
 		},
 
-		jump_hold_time=0,--how long jump is held
-		min_jump_press=5,--min time jump can be held
-		max_jump_press=15,--max time jump can be held
-
-		jump_btn_released=true,--can we jump again?
-		grounded=false,--on ground
-
-		airtime=0,--time since grounded
-		
-		--animation definitions.
-		--use with set_anim()
-		anims=
-		{
-			["stand"]=
-			{
-				ticks=1,--how long is each frame shown.
-				frames={2},--what frames are shown.
-			},
-			["walk"]=
-			{
-				ticks=5,
-				frames={3,4,5,6},
-			},
-			["jump"]=
-			{
-				ticks=1,
-				frames={1},
-			},
-			["slide"]=
-			{
-				ticks=1,
-				frames={7},
-			},
-		},
-
-		curanim="walk",--currently playing animation
-		curframe=1,--curent frame of animation.
-		animtick=0,--ticks until next frame should show.
-		flipx=false,--show sprite be flipped.
-		
 		--request new animation to play.
 		set_anim=function(self,anim)
 			if(anim==self.curanim)return--early out.
@@ -475,7 +417,7 @@ function _init()
    player.draw,
    player.new()
   ),
-  
+
   -- ...
  }
 end
@@ -488,11 +430,11 @@ end
 
 function _draw()
  cls()
- 
+
  for e in all(entities) do
   assert(coresume(e.draw))
  end
- 
+
  print(stat(0))
 end
 -->8
@@ -548,7 +490,7 @@ end
 cfg = {}
 
 cfg.snd = {
- jump=0,
+ jump = 0,
 }
 
 cfg.mus = {
@@ -556,23 +498,23 @@ cfg.mus = {
 
 cfg.anims = {
  stand = {
-  ticks=1,
-  frames={2}
+  ticks  = 1,
+  frames = {2}
  },
- 
+
  walk = {
-  ticks=5,
-  frames={3,4,5,6},
+  ticks  = 5,
+  frames = {3,4,5,6},
  },
- 
+
  jump = {
-  ticks=1,
-  frames={1},
+  ticks  = 1,
+  frames = {1},
  },
- 
+
  slide = {
-  ticks=1,
-  frames={7},
+  ticks  = 1,
+  frames = {7},
  },
 }
 -->8
@@ -625,31 +567,31 @@ player = {}
 
 player.new = function(x,y)
  return {
-  x=x,
-  y=y,
-  dx=0,
-  dy=0,
-  w=8,
-  h=8,
-  max_dx=1,
-  max_dy=2,
-  jump_speed=-1.75,
-  acc=0.05,
-  dcc=0.8,
-  air_dcc=1,
-  grav=0.15,
-  curanim="walk",
-  curframe=1,
-  animtick=0,
-  flipx=false,
-  jump_is_pressed=false,
-  jump_is_down=false,
-  ticks_down=0,
-  jump_hold_time=0,
-  min_jump_press=5,
-  max_jump_press=15,
-  jump_btn_released=true,
-  airtime=0,
+  x                 = x,
+  y                 = y,
+  dx                = 0,
+  dy                = 0,
+  w                 = 8,
+  h                 = 8,
+  max_dx            = 1,
+  max_dy            = 2,
+  jump_speed        = -1.75,
+  acc               = 0.05,
+  dcc               = 0.8,
+  air_dcc           = 1,
+  grav              = 0.15,
+  curanim           = "walk",
+  curframe          = 1,
+  animtick          = 0,
+  flipx             = false,
+  jump_is_pressed   = false,
+  jump_is_down      = false,
+  ticks_down        = 0,
+  jump_hold_time    = 0,
+  min_jump_press    = 5,
+  max_jump_press    = 15,
+  jump_btn_released = true,
+  airtime           = 0,
  }
 end
 
