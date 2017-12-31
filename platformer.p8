@@ -545,14 +545,16 @@ end
 -- config.
 --
 
-snd = {
+cfg = {}
+
+cfg.snd = {
  jump=0,
 }
 
-mus = {
+cfg.mus = {
 }
 
-anims = {
+cfg.anims = {
  stand = {
   ticks=1,
   frames={2}
@@ -579,17 +581,19 @@ anims = {
 -- math.
 --
 
-function sqr(a)
+math = {}
+
+math.sqr = function(a)
  return a*a
 end
 
 -- round to nearest whole #.
-function round(a)
+math.round = function(a)
  return flr(a+0.5)
 end
 
 -- point-to-box intersection.
-function intersects_pt_box(
+math.pt_box = function(
  px,py,
  x,y,w,h
 )
@@ -601,7 +605,7 @@ function intersects_pt_box(
 end
 
 -- box-to-box intersection.
-function intersects_box_box(
+math.box_box = function(
  x1,y1,w1,h1,
  x2,y2,w2,h2
 )
