@@ -1,189 +1,103 @@
 pico-8 cartridge // http://www.pico-8.com
 version 15
 __lua__
---advanced micro platformer
---@matthughson
-
---if you make a game with this
---starter kit, please consider
---linking back to the bbs post
---for this cart, so that others
---can learn from it too!
---enjoy! 
---@matthughson
-                
---log
-printh("\n\n-------\n-start-\n-------")
-
---config
---------------------------------
-
---sfx
-snd=
-{
-	jump=0,
-}
-
---music tracks
-mus=
-{
-
-}
 
 --math
 --------------------------------
-
---point to box intersection.
-function intersects_point_box(px,py,x,y,w,h)
-	if flr(px)>=flr(x) and flr(px)<flr(x+w) and
-				flr(py)>=flr(y) and flr(py)<flr(y+h) then
-		return true
-	else
-		return false
-	end
-end
-
---box to box intersection
-function intersects_box_box(
-	x1,y1,
-	w1,h1,
-	x2,y2,
-	w2,h2)
-
-	local xd=x1-x2
-	local xs=w1*0.5+w2*0.5
-	if abs(xd)>=xs then return false end
-
-	local yd=y1-y2
-	local ys=h1*0.5+h2*0.5
-	if abs(yd)>=ys then return false end
-	
-	return true
-end
 
 --check if pushing into side tile and resolve.
 --requires self.dx,self.x,self.y, and 
 --assumes tile flag 0 == solid
 --assumes sprite size of 8x8
-function collide_side(self)
-
-	local offset=self.w/3
-	for i=-(self.w/3),(self.w/3),2 do
-	--if self.dx>0 then
-		if fget(mget((self.x+(offset))/8,(self.y+i)/8),0) then
-			self.dx=0
-			self.x=(flr(((self.x+(offset))/8))*8)-(offset)
-			return true
-		end
-	--elseif self.dx<0 then
-		if fget(mget((self.x-(offset))/8,(self.y+i)/8),0) then
-			self.dx=0
-			self.x=(flr((self.x-(offset))/8)*8)+8+(offset)
-			return true
-		end
---	end
-	end
-	--didn't hit a solid tile.
-	return false
-end
+-- function collide_side(self)
+-- 
+-- 	local offset=self.w/3
+-- 	for i=-(self.w/3),(self.w/3),2 do
+-- 		if fget(mget((self.x+(offset))/8,(self.y+i)/8),0) then
+-- 			self.dx=0
+-- 			self.x=(flr(((self.x+(offset))/8))*8)-(offset)
+-- 			return true
+-- 		end
+-- 		if fget(mget((self.x-(offset))/8,(self.y+i)/8),0) then
+-- 			self.dx=0
+-- 			self.x=(flr((self.x-(offset))/8)*8)+8+(offset)
+-- 			return true
+-- 		end
+-- 	end
+-- 	--didn't hit a solid tile.
+-- 	return false
+-- end
 
 --check if pushing into floor tile and resolve.
 --requires self.dx,self.x,self.y,self.grounded,self.airtime and 
 --assumes tile flag 0 or 1 == solid
-function collide_floor(self)
-	--only check for ground when falling.
-	if self.dy<0 then
-		return false
-	end
-	local landed=false
-	--check for collision at multiple points along the bottom
-	--of the sprite: left, center, and right.
-	for i=-(self.w/3),(self.w/3),2 do
-		local tile=mget((self.x+i)/8,(self.y+(self.h/2))/8)
-		if fget(tile,0) or (fget(tile,1) and self.dy>=0) then
-			self.dy=0
-			self.y=(flr((self.y+(self.h/2))/8)*8)-(self.h/2)
-			self.grounded=true
-			self.airtime=0
-			landed=true
-		end
-	end
-	return landed
-end
+-- function collide_floor(self)
+-- 	--only check for ground when falling.
+-- 	if self.dy<0 then
+-- 		return false
+-- 	end
+-- 	local landed=false
+-- 	--check for collision at multiple points along the bottom
+-- 	--of the sprite: left, center, and right.
+-- 	for i=-(self.w/3),(self.w/3),2 do
+-- 		local tile=mget((self.x+i)/8,(self.y+(self.h/2))/8)
+-- 		if fget(tile,0) or (fget(tile,1) and self.dy>=0) then
+-- 			self.dy=0
+-- 			self.y=(flr((self.y+(self.h/2))/8)*8)-(self.h/2)
+-- 			self.grounded=true
+-- 			self.airtime=0
+-- 			landed=true
+-- 		end
+-- 	end
+-- 	return landed
+-- end
 
 --check if pushing into roof tile and resolve.
 --requires self.dy,self.x,self.y, and 
 --assumes tile flag 0 == solid
-function collide_roof(self)
-	--check for collision at multiple points along the top
-	--of the sprite: left, center, and right.
-	for i=-(self.w/3),(self.w/3),2 do
-		if fget(mget((self.x+i)/8,(self.y-(self.h/2))/8),0) then
-			self.dy=0
-			self.y=flr((self.y-(self.h/2))/8)*8+8+(self.h/2)
-			self.jump_hold_time=0
-		end
-	end
-end
-
---make 2d vector
-function m_vec(x,y)
-	local v=
-	{
-		x=x,
-		y=y,
-		
-  --get the length of the vector
-		get_length=function(self)
-			return sqrt(self.x^2+self.y^2)
-		end,
-		
-  --get the normal of the vector
-		get_norm=function(self)
-			local l = self:get_length()
-			return m_vec(self.x / l, self.y / l),l;
-		end,
-	}
-	return v
-end
-
---square root.
-function sqr(a) return a*a end
-
---round to the nearest whole number.
-function round(a) return flr(a+0.5) end
+-- function collide_roof(self)
+-- 	--check for collision at multiple points along the top
+-- 	--of the sprite: left, center, and right.
+-- 	for i=-(self.w/3),(self.w/3),2 do
+-- 		if fget(mget((self.x+i)/8,(self.y-(self.h/2))/8),0) then
+-- 			self.dy=0
+-- 			self.y=flr((self.y-(self.h/2))/8)*8+8+(self.h/2)
+-- 			self.jump_hold_time=0
+-- 		end
+-- 	end
+-- end
 
 
 --utils
 --------------------------------
 
 --print string with outline.
-function printo(str,startx,
-															 starty,col,
-															 col_bg)
-	print(str,startx+1,starty,col_bg)
-	print(str,startx-1,starty,col_bg)
-	print(str,startx,starty+1,col_bg)
-	print(str,startx,starty-1,col_bg)
-	print(str,startx+1,starty-1,col_bg)
-	print(str,startx-1,starty-1,col_bg)
-	print(str,startx-1,starty+1,col_bg)
-	print(str,startx+1,starty+1,col_bg)
-	print(str,startx,starty,col)
-end
+-- function printo(str,startx,
+-- 															 starty,col,
+-- 															 col_bg)
+-- 	print(str,startx+1,starty,col_bg)
+-- 	print(str,startx-1,starty,col_bg)
+-- 	print(str,startx,starty+1,col_bg)
+-- 	print(str,startx,starty-1,col_bg)
+-- 	print(str,startx+1,starty-1,col_bg)
+-- 	print(str,startx-1,starty-1,col_bg)
+-- 	print(str,startx-1,starty+1,col_bg)
+-- 	print(str,startx+1,starty+1,col_bg)
+-- 	print(str,startx,starty,col)
+-- end
 
 --print string centered with 
 --outline.
-function printc(
-	str,x,y,
-	col,col_bg,
-	special_chars)
-
-	local len=(#str*4)+(special_chars*3)
-	local startx=x-(len/2)
-	local starty=y-2
-	printo(str,startx,starty,col,col_bg)
-end
+-- function printc(
+-- 	str,x,y,
+-- 	col,col_bg,
+-- 	special_chars)
+-- 
+-- 	local len=(#str*4)+(special_chars*3)
+-- 	local startx=x-(len/2)
+-- 	local starty=y-2
+-- 	printo(str,startx,starty,col,col_bg)
+-- end
 
 --objects
 --------------------------------
@@ -429,86 +343,86 @@ function m_player(x,y)
 end
 
 --make the camera.
-function m_cam(target)
-	local c=
-	{
-		tar=target,--target to follow.
-		pos=m_vec(target.x,target.y),
-		
-		--how far from center of screen target must
-		--be before camera starts following.
-		--allows for movement in center without camera
-		--constantly moving.
-		pull_threshold=16,
-
-		--min and max positions of camera.
-		--the edges of the level.
-		pos_min=m_vec(64,64),
-		pos_max=m_vec(320,64),
-		
-		shake_remaining=0,
-		shake_force=0,
-
-		update=function(self)
-
-			self.shake_remaining=max(0,self.shake_remaining-1)
-			
-			--follow target outside of
-			--pull range.
-			if self:pull_max_x()<self.tar.x then
-				self.pos.x+=min(self.tar.x-self:pull_max_x(),4)
-			end
-			if self:pull_min_x()>self.tar.x then
-				self.pos.x+=min((self.tar.x-self:pull_min_x()),4)
-			end
-			if self:pull_max_y()<self.tar.y then
-				self.pos.y+=min(self.tar.y-self:pull_max_y(),4)
-			end
-			if self:pull_min_y()>self.tar.y then
-				self.pos.y+=min((self.tar.y-self:pull_min_y()),4)
-			end
-
-			--lock to edge
-			if(self.pos.x<self.pos_min.x)self.pos.x=self.pos_min.x
-			if(self.pos.x>self.pos_max.x)self.pos.x=self.pos_max.x
-			if(self.pos.y<self.pos_min.y)self.pos.y=self.pos_min.y
-			if(self.pos.y>self.pos_max.y)self.pos.y=self.pos_max.y
-		end,
-
-		cam_pos=function(self)
-			--calculate camera shake.
-			local shk=m_vec(0,0)
-			if self.shake_remaining>0 then
-				shk.x=rnd(self.shake_force)-(self.shake_force/2)
-				shk.y=rnd(self.shake_force)-(self.shake_force/2)
-			end
-			return self.pos.x-64+shk.x,self.pos.y-64+shk.y
-		end,
-
-		pull_max_x=function(self)
-			return self.pos.x+self.pull_threshold
-		end,
-
-		pull_min_x=function(self)
-			return self.pos.x-self.pull_threshold
-		end,
-
-		pull_max_y=function(self)
-			return self.pos.y+self.pull_threshold
-		end,
-
-		pull_min_y=function(self)
-			return self.pos.y-self.pull_threshold
-		end,
-		
-		shake=function(self,ticks,force)
-			self.shake_remaining=ticks
-			self.shake_force=force
-		end
-	}
-
-	return c
-end
+-- function m_cam(target)
+-- 	local c=
+-- 	{
+-- 		tar=target,--target to follow.
+-- 		pos=m_vec(target.x,target.y),
+-- 		
+-- 		--how far from center of screen target must
+-- 		--be before camera starts following.
+-- 		--allows for movement in center without camera
+-- 		--constantly moving.
+-- 		pull_threshold=16,
+-- 
+-- 		--min and max positions of camera.
+-- 		--the edges of the level.
+-- 		pos_min=m_vec(64,64),
+-- 		pos_max=m_vec(320,64),
+-- 		
+-- 		shake_remaining=0,
+-- 		shake_force=0,
+-- 
+-- 		update=function(self)
+-- 
+-- 			self.shake_remaining=max(0,self.shake_remaining-1)
+-- 			
+-- 			--follow target outside of
+-- 			--pull range.
+-- 			if self:pull_max_x()<self.tar.x then
+-- 				self.pos.x+=min(self.tar.x-self:pull_max_x(),4)
+-- 			end
+-- 			if self:pull_min_x()>self.tar.x then
+-- 				self.pos.x+=min((self.tar.x-self:pull_min_x()),4)
+-- 			end
+-- 			if self:pull_max_y()<self.tar.y then
+-- 				self.pos.y+=min(self.tar.y-self:pull_max_y(),4)
+-- 			end
+-- 			if self:pull_min_y()>self.tar.y then
+-- 				self.pos.y+=min((self.tar.y-self:pull_min_y()),4)
+-- 			end
+-- 
+-- 			--lock to edge
+-- 			if(self.pos.x<self.pos_min.x)self.pos.x=self.pos_min.x
+-- 			if(self.pos.x>self.pos_max.x)self.pos.x=self.pos_max.x
+-- 			if(self.pos.y<self.pos_min.y)self.pos.y=self.pos_min.y
+-- 			if(self.pos.y>self.pos_max.y)self.pos.y=self.pos_max.y
+-- 		end,
+-- 
+-- 		cam_pos=function(self)
+-- 			--calculate camera shake.
+-- 			local shk=m_vec(0,0)
+-- 			if self.shake_remaining>0 then
+-- 				shk.x=rnd(self.shake_force)-(self.shake_force/2)
+-- 				shk.y=rnd(self.shake_force)-(self.shake_force/2)
+-- 			end
+-- 			return self.pos.x-64+shk.x,self.pos.y-64+shk.y
+-- 		end,
+-- 
+-- 		pull_max_x=function(self)
+-- 			return self.pos.x+self.pull_threshold
+-- 		end,
+-- 
+-- 		pull_min_x=function(self)
+-- 			return self.pos.x-self.pull_threshold
+-- 		end,
+-- 
+-- 		pull_max_y=function(self)
+-- 			return self.pos.y+self.pull_threshold
+-- 		end,
+-- 
+-- 		pull_min_y=function(self)
+-- 			return self.pos.y-self.pull_threshold
+-- 		end,
+-- 		
+-- 		shake=function(self,ticks,force)
+-- 			self.shake_remaining=ticks
+-- 			self.shake_force=force
+-- 		end
+-- 	}
+-- 
+-- 	return c
+-- end
 
 --game flow
 --------------------------------
@@ -526,46 +440,264 @@ end
 --p8 functions
 --------------------------------
 
-function _init()
-	reset()
-end
-
-function _update60()
-	ticks+=1
-	p1:update()
-	cam:update()
-	--demo camera shake
-	if(btnp(4))cam:shake(15,2)
-end
-
-function _draw()
-
-	cls(0)
-	
-	camera(cam:cam_pos())
-	
-	map(0,0,0,0,128,128)
-	
-	p1:draw()
-	
-	--hud
-	camera(0,0)
-
-	printc("adv. micro platformer",64,4,7,0,0)
-
-end
+-- function _init()
+-- 	reset()
+-- end
+-- 
+-- function _update60()
+-- 	ticks+=1
+-- 	p1:update()
+-- 	cam:update()
+-- 	--demo camera shake
+-- 	if(btnp(4))cam:shake(15,2)
+-- end
+-- 
+-- function _draw()
+-- 	cls(0)
+-- 	camera(cam:cam_pos())
+-- 	map(0,0,0,0,128,128)
+-- 	p1:draw()
+-- 	--hud
+-- 	camera(0,0)
+-- 	printc("adv. micro platformer",64,4,7,0,0)
+-- end
 
 -->8
 
 --
--- test this is tab 1
+-- game loop.
 --
 
-function a()
- print('hello world')
+function _init()
+ entities = {
+  actor(
+   player.update,
+   player_draw,
+   player()
+  ),
+  
+  -- ...
+ }
 end
 
-a()
+function _update60()
+ for e in all(entities) do
+  assert(coresume(e.update))
+ end
+end
+
+function _draw()
+ cls(color.black)
+ 
+ for e in all(entities) do
+  assert(coresume(e.draw))
+ end
+ 
+ print(stat(0))
+end
+-->8
+
+--
+-- color.
+--
+
+color = {
+ black      = 0,
+ darkblue   = 1,
+ darkpurple = 2,
+ darkgreen  = 3,
+ brown      = 4,
+ darkgray   = 5,
+ lightgray  = 6,
+ white      = 7,
+ red        = 8,
+ orange     = 9,
+ yellow     = 10,
+ green      = 11,
+ blue       = 12,
+ indigo     = 13,
+ pink       = 14,
+ peach      = 15,
+}
+-->8
+
+--
+-- vec.
+--
+
+function vec(x,y)
+ return {
+  x=x,
+  y=y,
+ }
+end
+
+function vec_len(v)
+ return sqrt(v.x^2 + v.y^2)
+end
+
+function vec_norm(v)
+ local l = vec_len(v)
+ return vec(v.x/l, v.y/l), l
+end
+-->8
+
+--
+-- config.
+--
+
+snd = {
+ jump=0,
+}
+
+mus = {
+}
+
+anims = {
+ stand = {
+  ticks=1,
+  frames={2}
+ },
+ 
+ walk = {
+  ticks=5,
+  frames={3,4,5,6},
+ },
+ 
+ jump = {
+  ticks=1,
+  frames={1},
+ },
+ 
+ slide = {
+  ticks=1,
+  frames={7},
+ },
+}
+-->8
+
+--
+-- math.
+--
+
+function sqr(a)
+ return a*a
+end
+
+-- round to nearest whole #.
+function round(a)
+ return flr(a+0.5)
+end
+
+-- point-to-box intersection.
+function intersects_pt_box(
+ px,py,
+ x,y,w,h
+)
+ return
+  flr(x)  <= flr(px)  and
+  flr(px) <  flr(x+w) and
+  flr(y)  <= flr(py)  and
+  flr(py) <  flr(y+h)
+end
+
+-- box-to-box intersection.
+function intersects_box_box(
+ x1,y1,w1,h1,
+ x2,y2,w2,h2
+)
+ if (x1+w1 <= x2) return false
+ if (x2+w2 <= x1) return false
+ if (y1+h1 <= y2) return false
+ if (y2+h2 <= y1) return false
+ return true
+end
+-->8
+
+--
+-- player.
+--
+
+player = {}
+
+player.new = function(x,y)
+ return {
+  x=x,
+  y=y,
+  
+  dx=0,
+  dy=0,
+  
+  w=8,
+  h=8,
+  
+  -- max x speed
+  max_dx=1,
+  
+  -- max y speed
+  max_dy=2,
+  
+  jump_speed=-1.75,
+  
+  -- acceleration
+  acc=0.05,
+  
+  -- deceleration
+  dcc=0.8,
+
+  air_dcc=1,
+  grav=0.15,
+  
+  -- pressed this frame
+  jump_is_pressed=false,
+  
+  jump_is_down=false,
+
+  -- # of frames in down state
+  ticks_down=0,
+  
+  jump_hold_time=0,
+  min_jump_press=5,
+  max_jump_press=15,
+  jump_btn_released=true,
+  airtime=0,
+  
+  curanim="walk",
+  curframe=1,
+  animtick=0,
+  flipx=false,
+ }
+end
+
+player.udpate = function(state)
+ yield()
+ return player.update(state)
+end
+
+player.draw = function(state)
+ yield()
+ return player.draw(state)
+end
+-->8
+
+--
+-- actor.
+--
+-- requires update, draw, and
+-- state.
+--
+
+function actor(u,d,s) 
+ return {
+  update = cocreate(function()
+   return u(s)
+  end),
+  
+  draw = cocreate(function()
+   return d(s)
+  end),
+ }
+end
 __gfx__
 01234567001115000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 89abcdef011716000011150000011150000111500001115000011150011150000000000000000000000000000000000000000000000000000000000000000000
