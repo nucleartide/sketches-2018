@@ -2,299 +2,6 @@ pico-8 cartridge // http://www.pico-8.com
 version 15
 __lua__
 
---utils
---------------------------------
-
-
-
---objects
---------------------------------
-
---make the player
-function m_player(x,y)
-
-	local p=
-	{
-	
-		--helper for more complex
-		--button press tracking.
-		--todo: generalize button index.
-		jump_button=
-		{
-			update=function(self)
-				--start with assumption
-				--that not a new press.
-				self.is_pressed=false
-				if btn(5) then
-					if not self.is_down then
-						self.is_pressed=true
-					end
-					self.is_down=true
-					self.ticks_down+=1
-				else
-					self.is_down=false
-					self.is_pressed=false
-					self.ticks_down=0
-				end
-			end,
-			--state
-			is_pressed=false,--pressed this frame
-			is_down=false,--currently down
-			ticks_down=0,--how long down
-		},
-
-		--request new animation to play.
-		set_anim=function(self,anim)
-			if(anim==self.curanim)return--early out.
-			local a=self.anims[anim]
-			self.animtick=a.ticks--ticks count down.
-			self.curanim=anim
-			self.curframe=1
-		end,
-		
-		--call once per tick.
-		update=function(self)
-	
-			--todo: kill enemies.
-			
-			--track button presses
-			local bl=btn(0) --left
-			local br=btn(1) --right
-			
-			--move left/right
-			if bl==true then
-				self.dx-=self.acc
-				br=false--handle double press
-			elseif br==true then
-				self.dx+=self.acc
-			else
-				if self.grounded then
-					self.dx*=self.dcc
-				else
-					self.dx*=self.air_dcc
-				end
-			end
-
-			--limit walk speed
-			self.dx=mid(-self.max_dx,self.dx,self.max_dx)
-			
-			--move in x
-			self.x+=self.dx
-			
-			--hit walls
-			collide_side(self)
-
-			--jump buttons
-			self.jump_button:update()
-			
-			--jump is complex.
-			--we allow jump if:
-			--	on ground
-			--	recently on ground
-			--	pressed btn right before landing
-			--also, jump velocity is
-			--not instant. it applies over
-			--multiple frames.
-			if self.jump_button.is_down then
-				--is player on ground recently.
-				--allow for jump right after 
-				--walking off ledge.
-				local on_ground=(self.grounded or self.airtime<5)
-				--was btn presses recently?
-				--allow for pressing right before
-				--hitting ground.
-				local new_jump_btn=self.jump_button.ticks_down<10
-				--is player continuing a jump
-				--or starting a new one?
-				if self.jump_hold_time>0 or (on_ground and new_jump_btn) then
-					if(self.jump_hold_time==0)sfx(snd.jump)--new jump snd
-					self.jump_hold_time+=1
-					--keep applying jump velocity
-					--until max jump time.
-					if self.jump_hold_time<self.max_jump_press then
-						self.dy=self.jump_speed--keep going up while held
-					end
-				end
-			else
-				self.jump_hold_time=0
-			end
-			
-			--move in y
-			self.dy+=self.grav
-			self.dy=mid(-self.max_dy,self.dy,self.max_dy)
-			self.y+=self.dy
-
-			--floor
-			if not collide_floor(self) then
-				self:set_anim("jump")
-				self.grounded=false
-				self.airtime+=1
-			end
-
-			--roof
-			collide_roof(self)
-
-			--handle playing correct animation when
-			--on the ground.
-			if self.grounded then
-				if br then
-					if self.dx<0 then
-						--pressing right but still moving left.
-						self:set_anim("slide")
-					else
-						self:set_anim("walk")
-					end
-				elseif bl then
-					if self.dx>0 then
-						--pressing left but still moving right.
-						self:set_anim("slide")
-					else
-						self:set_anim("walk")
-					end
-				else
-					self:set_anim("stand")
-				end
-			end
-
-			--flip
-			if br then
-				self.flipx=false
-			elseif bl then
-				self.flipx=true
-			end
-
-			--anim tick
-			self.animtick-=1
-			if self.animtick<=0 then
-				self.curframe+=1
-				local a=self.anims[self.curanim]
-				self.animtick=a.ticks--reset timer
-				if self.curframe>#a.frames then
-					self.curframe=1--loop
-				end
-			end
-
-		end,
-
-		--draw the player
-		draw=function(self)
-			local a=self.anims[self.curanim]
-			local frame=a.frames[self.curframe]
-			spr(frame,
-				self.x-(self.w/2),
-				self.y-(self.h/2),
-				self.w/8,self.h/8,
-				self.flipx,
-				false)
-		end,
-	}
-
-	return p
-end
-
---make the camera.
--- function m_cam(target)
--- 	local c=
--- 	{
--- 		update=function(self)
--- 
--- 			self.shake_remaining=max(0,self.shake_remaining-1)
--- 			
--- 			--follow target outside of
--- 			--pull range.
--- 			if self:pull_max_x()<self.tar.x then
--- 				self.pos.x+=min(self.tar.x-self:pull_max_x(),4)
--- 			end
--- 			if self:pull_min_x()>self.tar.x then
--- 				self.pos.x+=min((self.tar.x-self:pull_min_x()),4)
--- 			end
--- 			if self:pull_max_y()<self.tar.y then
--- 				self.pos.y+=min(self.tar.y-self:pull_max_y(),4)
--- 			end
--- 			if self:pull_min_y()>self.tar.y then
--- 				self.pos.y+=min((self.tar.y-self:pull_min_y()),4)
--- 			end
--- 
--- 			--lock to edge
--- 			if(self.pos.x<self.pos_min.x)self.pos.x=self.pos_min.x
--- 			if(self.pos.x>self.pos_max.x)self.pos.x=self.pos_max.x
--- 			if(self.pos.y<self.pos_min.y)self.pos.y=self.pos_min.y
--- 			if(self.pos.y>self.pos_max.y)self.pos.y=self.pos_max.y
--- 		end,
--- 
--- 		cam_pos=function(self)
--- 			--calculate camera shake.
--- 			local shk=m_vec(0,0)
--- 			if self.shake_remaining>0 then
--- 				shk.x=rnd(self.shake_force)-(self.shake_force/2)
--- 				shk.y=rnd(self.shake_force)-(self.shake_force/2)
--- 			end
--- 			return self.pos.x-64+shk.x,self.pos.y-64+shk.y
--- 		end,
--- 
--- 		pull_max_x=function(self)
--- 			return self.pos.x+self.pull_threshold
--- 		end,
--- 
--- 		pull_min_x=function(self)
--- 			return self.pos.x-self.pull_threshold
--- 		end,
--- 
--- 		pull_max_y=function(self)
--- 			return self.pos.y+self.pull_threshold
--- 		end,
--- 
--- 		pull_min_y=function(self)
--- 			return self.pos.y-self.pull_threshold
--- 		end,
--- 		
--- 		shake=function(self,ticks,force)
--- 			self.shake_remaining=ticks
--- 			self.shake_force=force
--- 		end
--- 	}
--- 
--- 	return c
--- end
-
---game flow
---------------------------------
-
---reset the game to its initial
---state. use this instead of
---_init()
-function reset()
-	ticks=0
-	p1=m_player(64,100)
-	p1:set_anim("walk")
-	cam=m_cam(p1)
-end
-
---p8 functions
---------------------------------
-
--- function _init()
--- 	reset()
--- end
--- 
--- function _update60()
--- 	ticks+=1
--- 	p1:update()
--- 	cam:update()
--- 	--demo camera shake
--- 	if(btnp(4))cam:shake(15,2)
--- end
--- 
--- function _draw()
--- 	cls(0)
--- 	camera(cam:cam_pos())
--- 	map(0,0,0,0,128,128)
--- 	p1:draw()
--- 	--hud
--- 	camera(0,0)
--- 	printc("adv. micro platformer",64,4,7,0,0)
--- end
-
 -->8
 
 --
@@ -302,30 +9,22 @@ end
 --
 
 function _init()
- entities = {
-  actor.new(
-   player.update,
-   player.draw,
-   player.new()
-  ),
+  local p = player.new(0,0)
+  local c = cam.new(p)
 
-  -- ...
- }
+  entities = {
+    player = p,
+    cam = c,
+  }
 end
 
 function _update60()
- for e in all(entities) do
-  assert(coresume(e.update))
- end
 end
 
 function _draw()
  cls()
-
- for e in all(entities) do
-  assert(coresume(e.draw))
- end
-
+ --camera(cam.pos(entities.cam))
+ map(0,0,0,0,128,128)
  print(stat(0))
 end
 -->8
@@ -380,27 +79,27 @@ end
 prnt = {}
 
 prnt.thicc = function(str, x, y, col, border)
-  x = x or 0
-  y = y or 0
+ x = x or 0
+ y = y or 0
 
-  for i=-1,1 do
-    for j=-1,1 do
-      printer(str, x+i, y+j, border)
-    end
+ for i=-1,1 do
+  for j=-1,1 do
+   printer(str, x+i, y+j, border)
   end
+ end
 
-  printer(str, x, y, col)
+ printer(str, x, y, col)
 end
 
 prnt.center = function(
-  str,x,y,
-  col,col_bg,
-  special_chars
+ str,x,y,
+ col,col_bg,
+ special_chars
 )
-  local len=(#str*4)+(special_chars*3)
-  local startx=x-(len/2)
-  local starty=y-2
-  thicc(str,startx,starty,col,col_bg)
+ local len=(#str*4)+(special_chars*3)
+ local startx=x-(len/2)
+ local starty=y-2
+ thicc(str,startx,starty,col,col_bg)
 end
 -->8
 
@@ -480,47 +179,47 @@ math.box_box = function(
 end
 
 math.collide_floor = function(s)
-  if s.dy < 0 then
-    return false
+ if s.dy < 0 then
+  return false
+ end
+
+ local landed = false
+ local offset = s.w / 3
+
+ for i=-offset,offset,2 do
+  local tile = mget(
+   (s.x + i) / 8,
+   (s.y + s.h/2) / 8
+  )
+
+  if fget(tile,0) or fget(tile,1) then
+   s.dy = 0
+   s.y =
+    flr((s.y + s.h/2) / 8) * 8 -
+    s.h/2
+   s.grounded = true
+   s.airtime = 0
+   landed = true
   end
+ end
 
-  local landed = false
-  local offset = s.w / 3
-
-  for i=-offset,offset,2 do
-    local tile = mget(
-      (s.x + i) / 8,
-      (s.y + s.h/2) / 8
-    )
-
-    if fget(tile,0) or fget(tile,1) then
-      s.dy = 0
-      s.y =
-        flr((s.y + s.h/2) / 8) * 8 -
-        s.h/2
-      s.grounded = true
-      s.airtime = 0
-      landed = true
-    end
-  end
-
-  return landed
+ return landed
 end
 
 math.collide_roof = function(s)
-  local offset = s.w/3
-  for i=-offset,offset,2 do
-    local tile = mget(
-      (s.x + i) / 8,
-      (s.y - s.h/2) / 8
-    )
+ local offset = s.w/3
+ for i=-offset,offset,2 do
+  local tile = mget(
+   (s.x + i) / 8,
+   (s.y - s.h/2) / 8
+  )
 
-    if fget(tile, 0) then
-      s.dy = 0
-      s.y  = flr((s.y - (s.h/2)) / 8) * 8 + 8 + s.h/2
-      s.jump_hold_time = 0
-    end
+  if fget(tile, 0) then
+   s.dy = 0
+   s.y = flr((s.y - (s.h/2)) / 8) * 8 + 8 + s.h/2
+   s.jump_hold_time = 0
   end
+ end
 end
 -->8
 
@@ -549,22 +248,162 @@ player.new = function(x,y)
   curframe          = 1,
   animtick          = 0,
   flipx             = false,
-  jump_is_pressed   = false,
-  jump_is_down      = false,
-  ticks_down        = 0,
+  jump_is_pressed   = false, -- pressed this frame
+  jump_is_down      = false, -- currently down
+  ticks_down        = 0, -- how long btn is held down
   jump_hold_time    = 0,
   min_jump_press    = 5,
   max_jump_press    = 15,
   jump_btn_released = true,
   airtime           = 0,
+  grounded          = false,
  }
 end
 
-player.update = function(state)
- return state
+-- TODO: animations
+-- set_anim=function(self,anim)
+--   if(anim==self.curanim)return--early out.
+--   local a=self.anims[anim]
+--   self.animtick=a.ticks--ticks count down.
+--   self.curanim=anim
+--   self.curframe=1
+-- end,
+
+player.update = function(s)
+  local bl = btn(0)
+  local br = btn(1) and not bl
+
+  if bl then
+    s.dx -= s.acc
+  elseif br then
+    s.dx += s.acc
+  elseif s.grounded then
+    s.dx *= s.dcc
+  else
+    s.dx *= s.air_dcc
+  end
+
+  -- limit dx
+  s.dx = mid(-s.max_dx, s.dx, s.max_dx)
+
+  -- move in x
+  s.x += s.dx
+
+  -- side collisions
+  player.side(s)
+
+  -- jump button handling
+  s.jump_is_pressed = false
+
+  if btn(5) then -- button x
+    if not s.is_down then
+      s.is_pressed = true
+    end
+
+    s.jump_is_down = true
+    s.ticks_down += 1
+  else
+    s.is_pressed = false
+    s.jump_is_down = false
+    s.ticks_down = 0
+  end
+
+  --
+  -- handle jumps
+  --
+  if s.jump_is_down then
+    -- is player on ground recently?
+    -- allow for jump right after walking off ledge
+    local on_ground = s.grounded or s.airtime < 5
+
+    -- was button pressed recently?
+    -- allow for pressing right before hitting ground
+    local new_jump_btn = s.ticks_down < 10
+
+    -- is the player continuing a jump or starting a new one?
+    if s.jump_hold_time > 0 or (on_ground and new_jump_btn) then
+      -- new jump sound
+      if (s.jump_hold_time == 0) sfx(cfg.snd.jump)
+
+      -- increment
+      s.jump_hold_time += 1
+
+      -- keep applying jump velocity until max jump time
+      if s.jump_hold_time < s.max_jump_press then
+        s.dy = s.jump_speed
+      end
+    end
+  else
+    s.jump_hold_time = 0
+  end
+
+  -- move y
+  s.dy += s.grav
+  s.dy = mid(-s.max_dy, s.dy, s.max_dy)
+  s.y += s.dy
+
+  -- floor
+  if not math.collide_floor(s) then
+    -- set animation to jump
+    s.grounded = false
+    a.airtime += 1
+  end
+
+  -- handle roof collisions
+  math.collide_roof(s)
+
+  -- handle playing correct animation when on the ground
+  if s.grounded then
+    if br then
+      if s.dx < 0 then
+        -- pressing right but still moving left.
+        -- set animation to "slide"
+      else
+        -- set animation to "walk"
+      end
+    elseif bl then
+      if s.dx > 0 then
+        -- set animation to "slide"
+      else
+        -- set animation to "walk"
+      end
+    else
+      -- set animation to "stand"
+    end
+  end
+
+  -- flip
+  if br then
+    s.flipx = false
+  elseif bl then
+    s.flipx = true
+  end
+
+  -- TODO: abstract out ticks into coroutines
+
+  -- animation tick
+  s.animtick -= 1
+  if s.animtick <= 0 then
+    s.curframe += 1
+    local a = s.anims[s.curanim]
+    s.animtick = a.ticks -- reset timer
+    if s.curframe > #a.frames then
+      s.curframe = 1 -- loop
+    end
+  end
 end
 
 player.draw = function(state)
+  local s = s.anims[s.curanim]
+  local frame = a.frames[s.curframe]
+  spr(
+    frame,
+    s.x-s.w/2,
+    s.y-s.h/2,
+    s.w/8,
+    s.h/8,
+    s.flipx
+  )
 end
 
 -- check if colliding on side.
@@ -626,38 +465,76 @@ cam = {}
 
 cam.new = function(t)
  return {
-  target=t,
-  pos=vec.new(t.x, t.y),
-  
-  -- how far from center of
-  -- screen b4 camera follows
-  pull_threshold=16,
-  
-  -- edges of level
-  pos_min=vec.new(64, 64),
-  pos_max=vec.new(320, 64),
-  
-  shake_remaining=0,
-  shake_force=0,
+  target          = t,
+  pos             = vec.new(t.x, t.y),
+  pull_threshold  = 16, -- how far from center of screen b4 camera follows
+  pos_min         = vec.new(64, 64), -- edges of level
+  pos_max         = vec.new(320, 64),
+  shake_remaining = 0,
+  shake_force     = 0,
  }
 end
 
 cam.update = function(s)
+ -- decrement shake remaining
+ s.shake_remaining = max(0, s.shake_remaining - 1)
+end
+
+cam.update = function(s)
+  -- follow target outside of pull range
+
+  if pull_max_x(s) < s.tar.x then
+    -- target is right of pull range, move right
+    s.pos.x += min(s.tar.x - pull_max_x(s), 4)
+  end
+
+  if s.tar.x < pull_min_x(x) then
+    -- target is left of pull range, move left
+    s.pos.x += max(s.tar.x - pull_min_x(s), -4)
+  end
+
+  if pull_max_y(s) < s.tar.y then
+    -- target is below pull range, move down
+    s.pos.y += min(s.tar.y - pull_max_y(s), 4)
+  end
+
+  if s.tar.y < pull_min_y(s) then
+    -- target is above pull range, move up
+    s.pos.y += max(s.tar.y - pull_min_y(s), -4)
+  end
+
+  -- lock to edge
+  if(s.pos.x<s.pos_min.x)s.pos.x=s.pos_min.x
+  if(s.pos.x>s.pos_max.x)s.pos.x=s.pos_max.x
+  if(s.pos.y<s.pos_min.y)s.pos.y=s.pos_min.y
+  if(s.pos.y>s.pos_max.y)s.pos.y=s.pos_max.y
 end
 
 cam.pos = function(s)
+  local shake = vec.new(0,0)
+  if s.shake_remaining > 0 then
+    shake.x = rnd(s.shake_force) - s.shake_force/2
+    shake.y = rnd(s.shake_force) - s.shake_force/2
+  end
+  return
+    s.pos.x-64 + shake.x,
+    s.pos.y-64 + shake.y
 end
 
 cam.pull_max_x = function(s)
+ return s.pos.x + s.pull_threshold
 end
 
 cam.pull_min_x = function(s)
+ return s.pos.x - s.pull_threshold
 end
 
 cam.pull_max_y = function(s)
+ return s.pos.y + s.pull_threshold
 end
 
 cam.pull_min_y = function(s)
+ return s.pos.y - s.pull_threshold
 end
 
 cam.shake = function(
@@ -665,38 +542,8 @@ cam.shake = function(
  ticks,
  force
 )
-end
--->8
-
---
--- actor.
---
--- requires:
---
---  1. update fn
---  2. draw fn
---  3. state
---
-
-actor = {}
-
-actor.new = function(u,d,s)
- local update = function()
- 	s = u(s)
- 	yield()
-  return update()
- end
- 
- local draw = function(s)
-  d(s)
-  yield()
-  return draw()
- end
-
- return {
-  update = cocreate(update),
-  draw = cocreate(draw),
- }
+ s.shake_remaining = ticks
+ s.shake_force = force
 end
 __gfx__
 01234567001115000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
