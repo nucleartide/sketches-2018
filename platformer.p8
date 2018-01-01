@@ -2,102 +2,10 @@ pico-8 cartridge // http://www.pico-8.com
 version 15
 __lua__
 
---math
---------------------------------
-
---check if pushing into side tile and resolve.
---requires self.dx,self.x,self.y, and 
---assumes tile flag 0 == solid
---assumes sprite size of 8x8
--- function collide_side(self)
--- 
--- 	local offset=self.w/3
--- 	for i=-(self.w/3),(self.w/3),2 do
--- 		if fget(mget((self.x+(offset))/8,(self.y+i)/8),0) then
--- 			self.dx=0
--- 			self.x=(flr(((self.x+(offset))/8))*8)-(offset)
--- 			return true
--- 		end
--- 		if fget(mget((self.x-(offset))/8,(self.y+i)/8),0) then
--- 			self.dx=0
--- 			self.x=(flr((self.x-(offset))/8)*8)+8+(offset)
--- 			return true
--- 		end
--- 	end
--- 	--didn't hit a solid tile.
--- 	return false
--- end
-
---check if pushing into floor tile and resolve.
---requires self.dx,self.x,self.y,self.grounded,self.airtime and 
---assumes tile flag 0 or 1 == solid
--- function collide_floor(self)
--- 	--only check for ground when falling.
--- 	if self.dy<0 then
--- 		return false
--- 	end
--- 	local landed=false
--- 	--check for collision at multiple points along the bottom
--- 	--of the sprite: left, center, and right.
--- 	for i=-(self.w/3),(self.w/3),2 do
--- 		local tile=mget((self.x+i)/8,(self.y+(self.h/2))/8)
--- 		if fget(tile,0) or (fget(tile,1) and self.dy>=0) then
--- 			self.dy=0
--- 			self.y=(flr((self.y+(self.h/2))/8)*8)-(self.h/2)
--- 			self.grounded=true
--- 			self.airtime=0
--- 			landed=true
--- 		end
--- 	end
--- 	return landed
--- end
-
---check if pushing into roof tile and resolve.
---requires self.dy,self.x,self.y, and 
---assumes tile flag 0 == solid
--- function collide_roof(self)
--- 	--check for collision at multiple points along the top
--- 	--of the sprite: left, center, and right.
--- 	for i=-(self.w/3),(self.w/3),2 do
--- 		if fget(mget((self.x+i)/8,(self.y-(self.h/2))/8),0) then
--- 			self.dy=0
--- 			self.y=flr((self.y-(self.h/2))/8)*8+8+(self.h/2)
--- 			self.jump_hold_time=0
--- 		end
--- 	end
--- end
-
-
 --utils
 --------------------------------
 
---print string with outline.
--- function printo(str,startx,
--- 															 starty,col,
--- 															 col_bg)
--- 	print(str,startx+1,starty,col_bg)
--- 	print(str,startx-1,starty,col_bg)
--- 	print(str,startx,starty+1,col_bg)
--- 	print(str,startx,starty-1,col_bg)
--- 	print(str,startx+1,starty-1,col_bg)
--- 	print(str,startx-1,starty-1,col_bg)
--- 	print(str,startx-1,starty+1,col_bg)
--- 	print(str,startx+1,starty+1,col_bg)
--- 	print(str,startx,starty,col)
--- end
 
---print string centered with 
---outline.
--- function printc(
--- 	str,x,y,
--- 	col,col_bg,
--- 	special_chars)
--- 
--- 	local len=(#str*4)+(special_chars*3)
--- 	local startx=x-(len/2)
--- 	local starty=y-2
--- 	printo(str,startx,starty,col,col_bg)
--- end
 
 --objects
 --------------------------------
@@ -288,23 +196,6 @@ end
 -- function m_cam(target)
 -- 	local c=
 -- 	{
--- 		tar=target,--target to follow.
--- 		pos=m_vec(target.x,target.y),
--- 		
--- 		--how far from center of screen target must
--- 		--be before camera starts following.
--- 		--allows for movement in center without camera
--- 		--constantly moving.
--- 		pull_threshold=16,
--- 
--- 		--min and max positions of camera.
--- 		--the edges of the level.
--- 		pos_min=m_vec(64,64),
--- 		pos_max=m_vec(320,64),
--- 		
--- 		shake_remaining=0,
--- 		shake_force=0,
--- 
 -- 		update=function(self)
 -- 
 -- 			self.shake_remaining=max(0,self.shake_remaining-1)
@@ -412,7 +303,7 @@ end
 
 function _init()
  entities = {
-  actor(
+  actor.new(
    player.update,
    player.draw,
    player.new()
@@ -480,6 +371,36 @@ end
 vec.norm = function(v)
  local l = vec.len(v)
  return vec.new(v.x/l, v.y/l), l
+end
+
+--
+-- print utils.
+--
+
+prnt = {}
+
+prnt.thicc = function(str, x, y, col, border)
+  x = x or 0
+  y = y or 0
+
+  for i=-1,1 do
+    for j=-1,1 do
+      printer(str, x+i, y+j, border)
+    end
+  end
+
+  printer(str, x, y, col)
+end
+
+prnt.center = function(
+  str,x,y,
+  col,col_bg,
+  special_chars
+)
+  local len=(#str*4)+(special_chars*3)
+  local startx=x-(len/2)
+  local starty=y-2
+  thicc(str,startx,starty,col,col_bg)
 end
 -->8
 
@@ -557,6 +478,50 @@ math.box_box = function(
  if (y2+h2 <= y1) return false
  return true
 end
+
+math.collide_floor = function(s)
+  if s.dy < 0 then
+    return false
+  end
+
+  local landed = false
+  local offset = s.w / 3
+
+  for i=-offset,offset,2 do
+    local tile = mget(
+      (s.x + i) / 8,
+      (s.y + s.h/2) / 8
+    )
+
+    if fget(tile,0) or fget(tile,1) then
+      s.dy = 0
+      s.y =
+        flr((s.y + s.h/2) / 8) * 8 -
+        s.h/2
+      s.grounded = true
+      s.airtime = 0
+      landed = true
+    end
+  end
+
+  return landed
+end
+
+math.collide_roof = function(s)
+  local offset = s.w/3
+  for i=-offset,offset,2 do
+    local tile = mget(
+      (s.x + i) / 8,
+      (s.y - s.h/2) / 8
+    )
+
+    if fget(tile, 0) then
+      s.dy = 0
+      s.y  = flr((s.y - (s.h/2)) / 8) * 8 + 8 + s.h/2
+      s.jump_hold_time = 0
+    end
+  end
+end
 -->8
 
 --
@@ -596,13 +561,110 @@ player.new = function(x,y)
 end
 
 player.update = function(state)
- yield()
- return player.update(state)
+ return state
 end
 
 player.draw = function(state)
- yield()
- return player.draw(state)
+end
+
+-- check if colliding on side.
+-- requires x,y,w,dx.
+--
+-- note: this fn mutates state.
+-- note: x,y can be fractional.
+player.side = function(s)
+ -- 2.67
+ local offset = s.w/3
+
+ -- {-2.67, -0.67, 1.33}
+ for i=-offset,offset,2 do
+  -- check left side.
+  local l = mget(
+   (s.x - offset) / 8,
+   (s.y + i) / 8
+  )
+
+  -- check right side.
+  local r = mget(
+   (s.x + offset) / 8,
+   (s.y + i) / 8
+  )
+
+  l,r = fget(l,0), fget(r,0)
+
+  if l then
+   -- add offset to right side
+   -- of colliding block.
+   s.x =
+    flr((s.x-offset) / 8) * 8 +
+    8 +
+    offset
+  end
+
+  if r then
+   -- add offset to left side of
+   -- colliding block.
+   s.x =
+    flr((s.x+offset) / 8) * 8 -
+    offset
+  end
+
+  if l or r then
+   s.dx = 0
+   return true
+  end
+ end
+
+ return false
+end
+
+--
+-- camera.
+--
+
+cam = {}
+
+cam.new = function(t)
+ return {
+  target=t,
+  pos=vec.new(t.x, t.y),
+  
+  -- how far from center of
+  -- screen b4 camera follows
+  pull_threshold=16,
+  
+  -- edges of level
+  pos_min=vec.new(64, 64),
+  pos_max=vec.new(320, 64),
+  
+  shake_remaining=0,
+  shake_force=0,
+ }
+end
+
+cam.update = function(s)
+end
+
+cam.pos = function(s)
+end
+
+cam.pull_max_x = function(s)
+end
+
+cam.pull_min_x = function(s)
+end
+
+cam.pull_max_y = function(s)
+end
+
+cam.pull_min_y = function(s)
+end
+
+cam.shake = function(
+ s,
+ ticks,
+ force
+)
 end
 -->8
 
@@ -618,15 +680,22 @@ end
 
 actor = {}
 
-actor.new = function(u,d,s) 
+actor.new = function(u,d,s)
+ local update = function()
+ 	s = u(s)
+ 	yield()
+  return update()
+ end
+ 
+ local draw = function(s)
+  d(s)
+  yield()
+  return draw()
+ end
+
  return {
-  update = cocreate(function()
-   return u(s)
-  end),
-  
-  draw = cocreate(function()
-   return d(s)
-  end),
+  update = cocreate(update),
+  draw = cocreate(draw),
  }
 end
 __gfx__
