@@ -11,9 +11,7 @@ function _init()
 end
 
 function _update60()
- local l = btn(0)
- local r = btn(1)
- g = game.update(g, l, r)
+ game.update(g)
 end
 
 function _draw()
@@ -41,8 +39,12 @@ setmetatable(player, {
    grav = 0.15,
    max_dx = 1,
    max_dy = 2,
+   w = 8,
+   h = 8,
 
    -- state.
+   -- x,y is center of sprite.
+   -- x,y can be fractional.
    x = x or 0,
    y = y or 0,
    dx = 0,
@@ -51,24 +53,62 @@ setmetatable(player, {
  end,
 })
 
--- player -> bool -> bool -> player
--- this function is pure.
-function player.update(p, l, r)
+-- player -> void
+function player.update(p)
+ local l = btn(0)
+ local r = btn(1)
+
  -- move x.
  if (l) p.x -= 1
  if (r) p.x += 1
- 
+
  -- move y.
  p.dy += p.grav
  p.dy = mid(-p.max_dy, p.dy, p.max_dy)
  p.y += p.dy
 
- return p
+ -- handle floor collision.
+ player.collide_floor(p)
+end
+
+-- player -> bool
+-- this function mutates player.
+function player.collide_floor(p)
+ if (p.dy < 0) return false
+
+ local landed = false
+ local t = p.w / 3
+
+ -- check a t-shaped area below
+ -- the player.
+ for i=-t,t,t do
+  local below = (p.y + p.h/2) / 8
+
+  -- mget calls flr() for us,
+  -- no need to call flr().
+  local tile = mget(
+   (p.x+i) / 8,
+   below
+  )
+
+  if fget(tile, 0) then
+   -- place player on top of tile.
+   p.y = flr(below)*8 - p.h/2
+   p.dy = 0
+   landed = true
+  end
+ end
+
+ return landed
 end
 
 -- player -> void
 function player.draw(p)
- spr(p.sp, p.x, p.y)
+ spr(
+  p.sp,
+  p.x - p.w/2,
+  p.y - p.h/2
+ )
 end
 
 --
@@ -80,16 +120,14 @@ game = {}
 setmetatable(game, {
  __call = function()
   return {
-   player = player(),
+   player = player(12,10),
   }
  end,
 })
 
--- game -> bool -> bool -> game
--- this function is pure.
-function game.update(g, l, r)
- g.player = player.update(g.player, l, r)
- return g
+-- game -> void
+function game.update(g)
+ player.update(g.player)
 end
 
 -- todo: falling collisions
