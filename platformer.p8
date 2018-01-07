@@ -30,21 +30,23 @@ end
 --
 -- player.
 --
--- usage:
---
---  p = player()
---  player.update(p)
---  player.draw(p)
---
 
 player = {}
 
 setmetatable(player, {
  __call = function(_, x, y)
   return {
+   -- constants.
    sp = 1,
+   grav = 0.15,
+   max_dx = 1,
+   max_dy = 2,
+
+   -- state.
    x = x or 0,
    y = y or 0,
+   dx = 0,
+   dy = 0,
   }
  end,
 })
@@ -52,8 +54,15 @@ setmetatable(player, {
 -- player -> bool -> bool -> player
 -- this function is pure.
 function player.update(p, l, r)
+ -- move x.
  if (l) p.x -= 1
  if (r) p.x += 1
+ 
+ -- move y.
+ p.dy += p.grav
+ p.dy = mid(-p.max_dy, p.dy, p.max_dy)
+ p.y += p.dy
+
  return p
 end
 
@@ -83,7 +92,8 @@ function game.update(g, l, r)
  return g
 end
 
--- todo: make player move.
+-- todo: falling collisions
+-- todo: try weighted averaging
 __gfx__
 00000000000000001111111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000001999999100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
