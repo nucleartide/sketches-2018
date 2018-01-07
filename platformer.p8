@@ -11,6 +11,9 @@ function _init()
 end
 
 function _update60()
+ local l = btn(0)
+ local r = btn(1)
+ g = game.update(g, l, r)
 end
 
 function _draw()
@@ -40,15 +43,17 @@ setmetatable(player, {
  __call = function(_, x, y)
   return {
    sp = 1,
-   x = x,
-   y = y,
+   x = x or 0,
+   y = y or 0,
   }
  end,
 })
 
--- player -> player
+-- player -> bool -> bool -> player
 -- this function is pure.
-function player.update(p)
+function player.update(p, l, r)
+ if (l) p.x -= 1
+ if (r) p.x += 1
  return p
 end
 
@@ -70,6 +75,13 @@ setmetatable(game, {
   }
  end,
 })
+
+-- game -> bool -> bool -> game
+-- this function is pure.
+function game.update(g, l, r)
+ g.player = player.update(g.player, l, r)
+ return g
+end
 
 -- todo: make player move.
 __gfx__
