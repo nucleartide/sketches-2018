@@ -20,6 +20,8 @@ function _draw()
  player.draw(g.player)
  print(g.player.dx)
  print(stat(0))
+ print(g.player.grounded)
+ print(g.player.jump_ticks)
 end
 -->8
 
@@ -60,6 +62,7 @@ setmetatable(player, {
 
    jump_ticks = 0,
    max_jump_ticks = 15,
+   is_jumping = false,
   }
  end,
 })
@@ -83,18 +86,19 @@ function player.update(p)
  p.x += p.dx
 
  -- handle jump button.
- if btn(5) then -- x
+ if p.grounded and btn(5) then
+  p.is_jumping = true
+  p.jump_ticks += 1
+ elseif p.is_jumping and btn(5) then
   p.jump_ticks += 1
  else
+  p.is_jumping = false
   p.jump_ticks = 0
  end
 
- -- set dy to jump velocity if
- -- player is grounded or jump
- -- is held down.
+ -- use jump velocity if jumping.
  if
-  p.grounded and p.jump_ticks == 1 or
-  1 < p.jump_ticks and p.jump_ticks <= p.max_jump_ticks
+  1 <= p.jump_ticks and p.jump_ticks <= p.max_jump_ticks
  then
   p.dy = p.jump_vel
  end
