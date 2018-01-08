@@ -43,6 +43,7 @@ setmetatable(player, {
    max_dy = 2,
    w = 8,
    h = 8,
+   jump_vel = -1.5,
 
    -- try tweaking these.
    acc = 0.05,
@@ -53,8 +54,12 @@ setmetatable(player, {
    -- x,y can be fractional.
    x = x or 0,
    y = y or 0,
+   grounded = false,
    dx = 0,
    dy = 0,
+
+   jump_ticks = 0,
+   max_jump_ticks = 15,
   }
  end,
 })
@@ -77,13 +82,30 @@ function player.update(p)
  -- move x.
  p.x += p.dx
 
+ -- handle jump button.
+ if btn(5) then -- x
+  p.jump_ticks += 1
+ else
+  p.jump_ticks = 0
+ end
+
+ -- set dy to jump velocity if
+ -- player is grounded or jump
+ -- is held down.
+ if
+  p.grounded and p.jump_ticks == 1 or
+  1 < p.jump_ticks and p.jump_ticks <= p.max_jump_ticks
+ then
+  p.dy = p.jump_vel
+ end
+
  -- move y.
  p.dy += p.grav
  p.dy = mid(-p.max_dy, p.dy, p.max_dy)
  p.y += p.dy
 
  -- handle floor collision.
- player.collide_floor(p)
+ p.grounded = player.collide_floor(p)
 end
 
 -- player -> bool
@@ -144,6 +166,12 @@ setmetatable(game, {
 function game.update(g)
  player.update(g.player)
 end
+
+-- todo: add jumping
+-- allow jumps:
+--  on ground
+--  x recently on ground
+--  x pressed btn b4 landing
 __gfx__
 00000000000000001111111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000001999999100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
