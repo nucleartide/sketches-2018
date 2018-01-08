@@ -18,6 +18,8 @@ function _draw()
  cls()
  map(0, 0, 0, 0, 128, 128)
  player.draw(g.player)
+ print(g.player.dx)
+ print(stat(0))
 end
 -->8
 
@@ -42,6 +44,10 @@ setmetatable(player, {
    w = 8,
    h = 8,
 
+   -- try tweaking these.
+   acc = 0.05,
+   dcc = 0.8,
+
    -- state.
    -- x,y is center of sprite.
    -- x,y can be fractional.
@@ -56,11 +62,20 @@ setmetatable(player, {
 -- player -> void
 function player.update(p)
  local l = btn(0)
- local r = btn(1)
+ local r = btn(1) and not l
+
+ -- compute dx.
+ if l then
+  p.dx -= p.acc
+ elseif r then
+  p.dx += p.acc
+ else
+  p.dx *= p.dcc
+ end
+ p.dx = mid(-p.max_dx, p.dx, p.max_dx)
 
  -- move x.
- if (l) p.x -= 1
- if (r) p.x += 1
+ p.x += p.dx
 
  -- move y.
  p.dy += p.grav
@@ -106,8 +121,8 @@ end
 function player.draw(p)
  spr(
   p.sp,
-  p.x - p.w/2,
-  p.y - p.h/2
+  flr(p.x - p.w/2),
+  flr(p.y - p.h/2)
  )
 end
 
@@ -130,8 +145,18 @@ function game.update(g)
  player.update(g.player)
 end
 
--- todo: falling collisions
 -- todo: try weighted averaging
+-->8
+
+--
+-- math.
+--
+
+math = {}
+
+function math.round_100(n)
+ return flr(n*100 + 0.5) / 100
+end
 __gfx__
 00000000000000001111111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000001999999100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
