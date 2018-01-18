@@ -1,0 +1,17 @@
+graph rules {
+  subgraph cluster_0 {
+    label="verbs";
+    aim -- "move left/right"[label="strafe"];
+    jump;
+    shoot;
+  }
+
+  subgraph cluster_1 {
+    label="objects";
+    wall;
+    spikes;
+    checkpoint;
+    explosion;
+    hats;
+  }
+}
