@@ -1,9 +1,15 @@
 graph rules {
   subgraph cluster_0 {
     label="verbs";
-    aim -- "move left/right"[label="strafe"];
-    jump;
-    shoot;
+    // dist doesn't matter
+    "aim" -- "move left/right"[label="strafe"];
+    jump -- shoot[label="rocket jump"];
+    shoot -- aim[label="movement"];
+    fall -- jump[label="cancel"]
+    jump -- aim[label="wall climb"]
+    jump -- "move left/right"[label="leap"]
+    fall -- "move left/right"[label="avoid"]
+    fall -- shoot[label="double rocket jump"]
   }
 
   subgraph cluster_1 {
