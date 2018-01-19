@@ -12,12 +12,15 @@ graph rules {
     fall -- shoot[label="double rocket jump"]
   }
 
+// verbs have objects, things they act upon, to reinforce them, develop them,
+// and give them choices
   subgraph cluster_1 {
     label="objects";
     wall;
     spikes;
     checkpoint;
-    explosion;
-    hats;
+    explosion -- shoot;
+
+    hats; // none
   }
 }
