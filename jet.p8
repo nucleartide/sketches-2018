@@ -83,6 +83,10 @@ function box.new(x, y)
 end
 
 function box.update(s)
+  if s.play_order_end_animation != nil then
+    return
+  end
+
   if btn(buttons.left) then
     s.x -= 1
   end
