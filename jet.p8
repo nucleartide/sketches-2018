@@ -42,6 +42,19 @@ local config = {
   gravity = 2,
 }
 
+function intersects(
+  r1_left, r1_top, -- 4, 4
+  r1_right, r1_bottom, -- 5, 5
+
+  r2_left, r2_top, -- 6, 6
+  r2_right, r2_bottom -- 6, 6
+)
+  return not (r2_left > r1_right
+    or r2_bottom < r1_top
+    or r2_right < r1_left
+    or r2_top > r1_bottom)
+end
+
 --
 -- actors.
 --
@@ -139,6 +152,13 @@ function _update60()
 
   for s in all(actors.skus) do
     sku.update(s)
+
+    if intersects(
+      s.x, s.y, s.x+3, s.y+3,
+      actors.box.x-4, actors.box.y-4, actors.box.x+3, actors.box.y+3
+    ) then
+      del(actors.skus, s)
+    end
   end
 end
 
