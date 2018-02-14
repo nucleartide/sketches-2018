@@ -7,13 +7,20 @@ __lua__
 --
 -- todo:
 --
---   o side bounds
+--     side bounds
 --   x coroutine will die and crash
 --   x savings score
 --   x lizzy sprite
---   o lizzy animation
---   o walking sounds
---   o lose condition
+--     lizzy animation
+--     walking sounds
+--   x lose condition
+--     leveling structure / orders
+--     savings animation
+--     get this on the jet website
+--     particle effects
+--     clouds in the background
+--     purple SKUs
+--     item graphics
 --
 
 --
@@ -141,6 +148,7 @@ end
 
 local actors = {}
 local savings = 0
+local orders = 1
 
 function _init()
   actors.box = box.new(64, 105)
@@ -153,19 +161,23 @@ function _init()
   -- _draw = draw_game_over
 end
 
-local spawner = cocreate(function()
-  for i=1,10 do
-    add(actors.skus, sku.new(64, -10))
+local spawner = cocreate(function(speed)
+  while true do
+    for i=1,10 do
+      add(actors.skus, sku.new(64, -10))
 
-    local seconds = 2 * 60
-    for i=1,seconds do
-      yield()
+      local seconds = speed * 60
+      for i=1,seconds do
+        yield()
+      end
     end
+
+    orders += 1
   end
 end)
 
 lizzy_walk = cocreate(function(s)
-  local seconds = 0.5 * 60
+  local seconds = 0.1 * 60
   while true do
     if btn(buttons.left) or btn(buttons.right) then
       for i=1,seconds do
@@ -186,7 +198,7 @@ end)
 function update_game()
   box.update(actors.box)
 
-  coresume(spawner)
+  coresume(spawner, 2)
 
   for s in all(actors.skus) do
     sku.update(s)
@@ -216,6 +228,7 @@ function draw_game()
   end
 
   print('savings: $' .. savings, 3, 3, colors.white)
+  print('orders: ' .. orders, 85, 3, colors.white)
   -- print(actors.box.x ..  ' ' .. actors.box.y, 3, 20, colors.white)
   -- rect(actors.box.x-4, actors.box.y-4, actors.box.x+3, actors.box.y+3)
   -- print(stat(0), 7)
