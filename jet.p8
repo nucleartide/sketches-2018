@@ -26,7 +26,10 @@ __lua__
 --   x dedupe purple mode threads
 --   x move a bit faster
 --   x score multiplier
---   x make purple last shorter amount of time
+--
+-- bugs:
+--
+--     make purple last shorter amount of time
 --     purple serves as extra life
 --
 --     define level pacing (after jit)
