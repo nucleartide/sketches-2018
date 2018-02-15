@@ -7,7 +7,7 @@ __lua__
 --
 -- todo:
 --
---     side bounds
+--   x side bounds
 --   x coroutine will die and crash
 --   x savings score
 --   x lizzy sprite
@@ -22,6 +22,7 @@ __lua__
 --     purple SKUs
 --     item graphics
 --     boxes should fall at random spots
+--     spawn boxes next to player
 --
 
 --
@@ -93,6 +94,14 @@ function box.update(s)
 
   if btn(buttons.right) then
     s.x += 1
+  end
+
+  if (s.x-8) < 0 then
+    s.x = 8
+  end
+
+  if (s.x+7) > 127 then
+    s.x = 120
   end
 end
 
@@ -175,7 +184,7 @@ end
 local spawner = cocreate(function(speed)
   while true do
     for i=1,10 do
-      add(actors.skus, sku.new(64, -10))
+      add(actors.skus, sku.new(flr(rnd(100)) + 10, -10))
 
       local seconds = speed * 60
       for i=1,seconds do
