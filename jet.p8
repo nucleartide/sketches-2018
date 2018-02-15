@@ -78,6 +78,23 @@ function hcenter(s)
   return 64-#s*2
 end
 
+local function make_thicc(printer, border)
+  return function(str, x, y, col)
+    x = x or 0
+    y = y or 0
+
+    for i=-1,1 do
+      for j=-1,1 do
+        printer(str, x+i, y+j, border)
+      end
+    end
+
+    printer(str, x, y, col)
+  end
+end
+
+purple_price_print = make_thicc(print, 2)
+
 --
 -- actors.
 --
@@ -406,7 +423,7 @@ animate_text = cocreate(function()
   while true do
     while display_savings < savings do
       display_savings += 1
-      print('savings: $' .. display_savings, 3, 3, colors.white)
+      purple_price_print('savings: $' .. display_savings, 3, 3, colors.white)
       yield()
     end
 
