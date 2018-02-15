@@ -181,6 +181,12 @@ function sku.new(x, y)
   i = flr(rnd(#sku_sprites) + 1)
   local sp = sku_sprites[i]
 
+  local is_purple = false
+  if orders >= 3 then
+    local r = rnd()
+    if r > 0.5 then is_purple = true end
+  end
+
   return {
     x = x,
     y = y,
