@@ -12,15 +12,15 @@ __lua__
 --   x savings score
 --   x lizzy sprite
 --   x lizzy animation
---   o walking sounds
+--   x walking sounds
 --   x lose condition
 --   x leveling structure / orders
 --     savings animation
 --     get this on the jet website
---     particle effects
---   o clouds in the background
+--   x particle effects
+--   x clouds in the background
 --     purple SKUs
---     item graphics
+--   x item graphics
 --   x boxes should fall at random spots
 --   x spawn boxes next to player
 --
@@ -67,6 +67,14 @@ function intersects(
     or r2_bottom < r1_top
     or r2_right < r1_left
     or r2_top > r1_bottom)
+end
+
+function hcenter(s)
+  -- screen center minus the
+  -- string length times the
+  -- pixels in a char's width,
+  -- cut in half
+  return 64-#s*2
 end
 
 --
@@ -185,7 +193,13 @@ function sku.update(s)
   -- 1
   -- 1.5
   -- 2
-  s.y += min(orders/2 + 1, config.gravity)
+  if orders == 1 then
+    s.y += 1
+  elseif orders == 2 then
+    s.y += 1.5
+  elseif orders >= 3 then
+    s.y += config.gravity
+  end
 end
 
 function sku.draw(s)
@@ -207,7 +221,7 @@ end
 
 local actors = {}
 local savings = 0
-orders = 0
+orders = 1
 local caught_boxes = 0
 
 function _init()
@@ -376,8 +390,20 @@ end
 
 function draw_game_over()
   cls(colors.blue)
-  print('game over', 30, 50, 7)
-  print('you saved $' .. savings .. ' on jet!', 30, 60, 7)
+
+  local text = 'game over :('
+  print(text, hcenter(text), 50, 7)
+
+  if orders == 1 then
+    text = 'you ordered ' .. orders .. ' time on jet!'
+    print(text, hcenter(text), 60, 7)
+  else
+    text = 'you ordered ' .. orders .. ' times on jet!'
+    print(text, hcenter(text), 60, 7)
+  end
+
+  text = 'and you saved $' .. savings .. '!'
+  print(text, hcenter(text), 70, 7)
 end
 __gfx__
 000000002222222222222222000000044400000000000004440000006d6d6d6d0000000444000000000000044400000000000000000000000000000000000000
