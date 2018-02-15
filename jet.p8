@@ -12,7 +12,7 @@ __lua__
 --   x savings score
 --   x lizzy sprite
 --     lizzy animation
---     walking sounds
+--   o walking sounds
 --   x lose condition
 --     leveling structure / orders
 --     savings animation
@@ -115,11 +115,12 @@ function box.draw(s)
   -- spr(n, x, y, [w, h], [flip_x], [flip_y]) -- draw sprite
   sspr(8, 0, 16, 8, s.x-8, s.y, 16, 8)
 
-  rectfill(
-    s.x, s.y,
-    s.x, s.y,
-    colors.white
-  )
+  -- draw debug dot
+--   rectfill(
+--     s.x, s.y,
+--     s.x, s.y,
+--     colors.white
+--   )
 
   -- spr(n, x, y, [w, h], [flip_x], [flip_y]) -- draw sprite
   -- spr(3, s.x, s.y+3, 2, 2) -- draw lizzy
@@ -184,7 +185,19 @@ end
 local spawner = cocreate(function(speed)
   while true do
     for i=1,10 do
-      add(actors.skus, sku.new(flr(rnd(100)) + 10, -10))
+      local box_x = actors.box.x
+      local range = 40
+      local new_x = box_x + flr(rnd(range * 2)) - range
+
+      if new_x < 10 then
+        new_x = 10
+      end
+
+      if new_x > 110 then
+        new_x = 110
+      end
+
+      add(actors.skus, sku.new(new_x, -10))
 
       local seconds = speed * 60
       for i=1,seconds do
