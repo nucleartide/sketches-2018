@@ -14,15 +14,15 @@ __lua__
 --     lizzy animation
 --   o walking sounds
 --   x lose condition
---     leveling structure / orders
+--   x leveling structure / orders
 --     savings animation
 --     get this on the jet website
 --     particle effects
 --     clouds in the background
 --     purple SKUs
 --     item graphics
---     boxes should fall at random spots
---     spawn boxes next to player
+--   x boxes should fall at random spots
+--   x spawn boxes next to player
 --
 
 --
@@ -79,12 +79,21 @@ function box.new(x, y)
   return {
     x = x,
     y = y,
+
+    display_x = x,
+    display_y = y,
+
     play_order_end_animation = nil,
+    play_box_animation = nil,
   }
 end
 
 function box.update(s)
   if s.play_order_end_animation != nil then
+    return
+  end
+
+  if s.play_box_animation != nil then
     return
   end
 
@@ -105,15 +114,24 @@ function box.update(s)
   end
 end
 
-function box.draw(s)
+function draw_box(x, y)
   rectfill(
-    s.x - 8, s.y - 8,
-    s.x + 7, s.y + 7,
+    x - 8, y - 8,
+    x + 7, y + 7,
     colors.dark_purple
   )
+  sspr(8, 0, 16, 8, x-8, y, 16, 8)
+end
 
+function box.draw(s)
   -- spr(n, x, y, [w, h], [flip_x], [flip_y]) -- draw sprite
-  sspr(8, 0, 16, 8, s.x-8, s.y, 16, 8)
+  if s.play_box_animation != nil or s.play_order_end_animation != nil then
+    if s.play_box_animation != nil then
+      coresume(s.play_box_animation, s)
+    end
+  else
+    draw_box(s.x, s.y)
+  end
 
   -- draw debug dot
 --   rectfill(
@@ -186,7 +204,7 @@ local spawner = cocreate(function(speed)
   while true do
     for i=1,10 do
       local box_x = actors.box.x
-      local range = 40
+      local range = 25
       local new_x = box_x + flr(rnd(range * 2)) - range
 
       if new_x < 10 then
@@ -252,6 +270,25 @@ function lizzy_drop_box(s)
   end
 end
 
+-- cocreate this too
+function lizzy_box_conveyor(s)
+  s.display_x = s.x
+  s.display_y = s.y+2
+
+  while s.display_x < 140 do
+    s.display_x += 1
+
+    printh(s.display_x .. ' ' .. s.display_y, 'log.txt')
+    draw_box(s.display_x, s.display_y)
+
+    if (s.display_x == 140 or s.display_x == 141) then
+      s.play_box_animation = nil
+    end
+
+    yield()
+  end
+end
+
 -- array of bools
 created_boxes = {}
 
@@ -283,9 +320,11 @@ function update_game()
     caught_boxes > 0 and
     caught_boxes % 10 == 0 and
     actors.box.play_order_end_animation == nil and
+    actors.box.play_box_animation == nil and
     not created_boxes[caught_boxes / 10]
   then
     actors.box.play_order_end_animation = cocreate(lizzy_drop_box, s)
+    actors.box.play_box_animation = cocreate(lizzy_box_conveyor)
     created_boxes[caught_boxes / 10] = true
     -- printh("starting new order end anim", "log.txt")
   end
@@ -327,7 +366,7 @@ __gfx__
 0007700022227277772272220f0f044fff4400000f0f044fff440000000000000000044fff4400000000044fff44000000000000000000000000000000000000
 00700700222272722222722201010444f444400001010444f44440000000000000000444f444400000000444f444400000000000000000000000000000000000
 00000000272272722722727200101117f714400000101117f71440000000000000000117f714400000000017f714400000000000000000000000000000000000
-0000000022772227722227220001111111144000000111111114400000000000000f11f111144000000000111114400000000000000000000000000000000000
+0000000022772227722227220001111111144000000111111114400000000000000f11f111144000000000166614400000000000000000000000000000000000
 00000000000000000000000000000017771040000000001777104000000000000000001777104000000000177711400000000000000000000000000000000000
 0000000000000000000000000000001666100000000000166610000000000000000000166610000000000f16661f000000000000000000000000000000000000
 00000000000000000000000000000017771000000000001777100000000000000000001777100000000000177710000000000000000000000000000000000000
