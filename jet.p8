@@ -23,6 +23,7 @@ __lua__
 --   x item graphics
 --   x boxes should fall at random spots
 --   x spawn boxes next to player
+--     define level pacing (after jit)
 --
 
 --
@@ -256,6 +257,7 @@ end
 
 local actors = {}
 local savings = 0
+local display_savings = 0
 orders = 1
 local caught_boxes = 0
 
@@ -400,6 +402,19 @@ function update_game()
   end
 end
 
+animate_text = cocreate(function()
+  while true do
+    while display_savings < savings do
+      display_savings += 1
+      print('savings: $' .. display_savings, 3, 3, colors.white)
+      yield()
+    end
+
+    print('savings: $' .. display_savings, 3, 3, colors.white)
+    yield()
+  end
+end)
+
 function draw_game()
   cls(colors.blue)
 
@@ -413,11 +428,8 @@ function draw_game()
     sku.draw(s)
   end
 
-  print('savings: $' .. savings, 3, 3, colors.white)
+  coresume(animate_text)
   print('orders: ' .. orders, 85, 3, colors.white)
-  -- print(actors.box.x ..  ' ' .. actors.box.y, 3, 20, colors.white)
-  -- rect(actors.box.x-4, actors.box.y-4, actors.box.x+3, actors.box.y+3)
-  -- print(stat(0), 7)
 end
 
 function update_game_over()
