@@ -182,9 +182,15 @@ function sku.new(x, y)
   local sp = sku_sprites[i]
 
   local is_purple = false
-  if orders >= 3 then
+  if orders >= 2 then
     local r = rnd()
     if r > 0.5 then is_purple = true end
+  end
+
+  if is_purple then
+    is_purple = cocreate(two_frame_anim)
+  else
+    is_purple = nil
   end
 
   return {
@@ -192,6 +198,7 @@ function sku.new(x, y)
     y = y,
     c = c,
     sp = sp,
+    is_purple = is_purple,
   }
 end
 
@@ -216,9 +223,31 @@ function sku.draw(s)
 --  )
 
   -- n, x, y
-  spr(
-    s.sp, s.x-4, s.y-4
-  )
+  spr(s.sp, s.x-4, s.y-4)
+
+  if s.is_purple != nil then
+    coresume(s.is_purple, s.x, s.y)
+    -- spr(44, s.x-4, s.y-4)
+  end
+end
+
+-- cocreate this for each sku
+two_frame_anim = function()
+  local seconds = 0.5 * 60
+  local x
+  local y
+
+  while true do
+    for i=1,seconds do
+      x, y = yield()
+      spr(44, x-4, y-4)
+    end
+
+    for i=1,seconds do
+      x, y = yield()
+      spr(45, x-4, y-4)
+    end
+  end
 end
 
 --
