@@ -11,14 +11,14 @@ __lua__
 --   x coroutine will die and crash
 --   x savings score
 --   x lizzy sprite
---     lizzy animation
+--   x lizzy animation
 --   o walking sounds
 --   x lose condition
 --   x leveling structure / orders
 --     savings animation
 --     get this on the jet website
 --     particle effects
---     clouds in the background
+--   o clouds in the background
 --     purple SKUs
 --     item graphics
 --   x boxes should fall at random spots
@@ -163,7 +163,8 @@ function sku.new(x, y)
 end
 
 function sku.update(s)
-  s.y += config.gravity
+  s.y += min(orders+1, config.gravity)
+  -- s.y += config.gravity
 end
 
 function sku.draw(s)
@@ -186,7 +187,7 @@ end
 
 local actors = {}
 local savings = 0
-local orders = 0
+orders = 0
 local caught_boxes = 0
 
 function _init()
