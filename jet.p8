@@ -15,7 +15,7 @@ __lua__
 --   x walking sounds
 --   x lose condition
 --   x leveling structure / orders
---     savings animation
+--   x savings animation
 --     get this on the jet website
 --   x particle effects
 --   x clouds in the background
@@ -23,6 +23,12 @@ __lua__
 --   x item graphics
 --   x boxes should fall at random spots
 --   x spawn boxes next to player
+--   x dedupe purple mode threads
+--   x move a bit faster
+--   x score multiplier
+--   x make purple last shorter amount of time
+--     purple serves as extra life
+--
 --     define level pacing (after jit)
 --
 
@@ -124,11 +130,19 @@ function box.update(s)
   end
 
   if btn(buttons.left) then
-    s.x -= 1
+    if in_purple_mode != nil then
+      s.x -= 2
+    else
+      s.x -= 1
+    end
   end
 
   if btn(buttons.right) then
-    s.x += 1
+    if in_purple_mode != nil then
+      s.x += 2
+    else
+      s.x += 1
+    end
   end
 
   if (s.x-8) < 0 then
@@ -227,7 +241,11 @@ function sku.update(s)
   if orders == 1 then
     s.y += 1
   elseif orders == 2 then
-    s.y += 1.5
+    if in_purple_mode != nil then
+      s.y += 2
+    else
+      s.y += 1.5
+    end
   elseif orders >= 3 then
     s.y += config.gravity
   end
@@ -274,6 +292,7 @@ end
 
 local actors = {}
 local savings = 0
+local in_purple_mode = nil
 local display_savings = 0
 orders = 1
 local caught_boxes = 0
@@ -381,6 +400,15 @@ end
 -- array of bools
 created_boxes = {}
 
+-- cocreate this
+purple_mode_thread = function()
+  local seconds = 2 * 60 -- 60 seconds
+  for i=1,seconds do
+    yield()
+  end
+  in_purple_mode = nil
+end
+
 function update_game()
   box.update(actors.box)
 
@@ -394,11 +422,25 @@ function update_game()
       actors.box.x-8, actors.box.y-8, actors.box.x+7, actors.box.y+7
     ) then
       del(actors.skus, s)
-      savings += 10
+
+			if s.is_purple != nil and in_purple_mode == nil then
+				in_purple_mode = cocreate(purple_mode_thread)
+			end
+
+      if in_purple_mode != nil then
+        coresume(in_purple_mode)
+        savings *= 1.2
+      else
+        savings += 10
+      end
+
       caught_boxes += 1
     end
 
     if s.y > 128 then
+      -- if in_purple_mode != nil then
+      -- else
+      -- end
       _update60 = update_game_over
       _draw = draw_game_over
     end
@@ -427,7 +469,11 @@ animate_text = cocreate(function()
       yield()
     end
 
-    print('savings: $' .. display_savings, 3, 3, colors.white)
+    if in_purple_mode != nil then
+      purple_price_print('savings: $' .. display_savings, 3, 3, colors.white)
+    else
+      print('savings: $' .. display_savings, 3, 3, colors.white)
+    end
     yield()
   end
 end)
