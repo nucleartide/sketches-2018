@@ -19,7 +19,7 @@ __lua__
 --     get this on the jet website
 --   x particle effects
 --   x clouds in the background
---     purple SKUs
+--   x purple SKUs
 --   x item graphics
 --   x boxes should fall at random spots
 --   x spawn boxes next to player
