@@ -38,6 +38,8 @@ buttons = {
 config = {
 }
 
+sqrt2 = 1.4167
+
 --
 -- actors.
 --
@@ -48,10 +50,39 @@ function player.new(x, y)
   local self = {}
 
   function self.update()
+    local dx = 0
+    if btn(buttons.left) then dx -= 1.5 end
+    if btn(buttons.right) then dx += 1.5 end
+
+    local dy = 0
+    if btn(buttons.up) then dy -= 1.5 end
+    if btn(buttons.down) then dy += 1.5 end
+
+    if dx != 0 and dy != 0 then
+      -- dx *= 0.7059 -- sqrt(0.5)
+      if dx < 0 then
+        dx = -1
+      elseif dx > 0 then
+        dx = 1
+      end
+
+      if dy < 0 then
+        dy = -1
+      elseif dy > 0 then
+        dy = 1
+      end
+    end
+
+    -- TODO: maybe try mouse input?
+
+    x += dx
+    y += dy
   end
 
   function self.draw()
     rectfill(x, y, x+5, y+5, colors.dark_blue)
+    print('x:'..x)
+    print('y:'..y)
   end
 
   return self
