@@ -51,32 +51,25 @@ function player.new(x, y)
 
   function self.update()
     local dx = 0
-    if btn(buttons.left) then dx -= 1.5 end
-    if btn(buttons.right) then dx += 1.5 end
+    if btn(buttons.left) then dx -= 1 end
+    if btn(buttons.right) then dx += 1 end
 
     local dy = 0
-    if btn(buttons.up) then dy -= 1.5 end
-    if btn(buttons.down) then dy += 1.5 end
+    if btn(buttons.up) then dy -= 1 end
+    if btn(buttons.down) then dy += 1 end
 
-    if dx != 0 and dy != 0 then
-      -- dx *= 0.7059 -- sqrt(0.5)
-      if dx < 0 then
-        dx = -1
-      elseif dx > 0 then
-        dx = 1
-      end
-
-      if dy < 0 then
-        dy = -1
-      elseif dy > 0 then
-        dy = 1
-      end
-    end
-
-    -- TODO: maybe try mouse input?
+--    if dx != 0 and dy != 0 then
+--      dx *= 0.7059 -- sqrt(0.5)
+--      dy *= 0.7059
+--    end
 
     x += dx
     y += dy
+
+    -- TODO: product tiles
+
+    -- x: mouse movement
+    -- x: diagonal movement is faster to avoid jittery movement
   end
 
   function self.draw()
