@@ -3,6 +3,14 @@ version 16
 __lua__
 
 --
+-- TODO:
+--
+-- - try mouse movement?
+-- - antitliased movement (so when on a 0.5 point,
+--   draw half shaded pixels
+--
+
+--
 -- utils.
 --
 
@@ -49,33 +57,65 @@ player = {}
 function player.new(x, y)
   local self = {}
 
+  -- diagonal movement is faster than vertical or horizontal
   function self.update()
     local dx = 0
-    if btn(buttons.left) then dx -= 1 end
-    if btn(buttons.right) then dx += 1 end
+    if btn(buttons.left) then dx -= 0.5 end
+    if btn(buttons.right) then dx += 0.5 end
 
     local dy = 0
-    if btn(buttons.up) then dy -= 1 end
-    if btn(buttons.down) then dy += 1 end
-
---    if dx != 0 and dy != 0 then
---      dx *= 0.7059 -- sqrt(0.5)
---      dy *= 0.7059
---    end
+    if btn(buttons.up) then dy -= 0.5 end
+    if btn(buttons.down) then dy += 0.5 end
 
     x += dx
     y += dy
 
     -- TODO: product tiles
-
-    -- x: mouse movement
-    -- x: diagonal movement is faster to avoid jittery movement
   end
 
   function self.draw()
     rectfill(x, y, x+5, y+5, colors.dark_blue)
     print('x:'..x)
     print('y:'..y)
+  end
+
+  return self
+end
+
+spawner = {}
+
+function spawner.new()
+  local self = {}
+  local boxes = {}
+
+  for i=0,60,30 do
+    for j=-200,0,40 do
+      add(boxes, box.new(i,j))
+    end
+  end
+
+  function self.update()
+    for b in all(boxes) do b.update() end
+  end
+
+  function self.draw()
+    for b in all(boxes) do b.draw() end
+  end
+
+  return self
+end
+
+box = {}
+
+function box.new(x, y)
+  local self = {}
+
+  function self.update()
+    y += 1
+  end
+
+  function self.draw()
+    rectfill(x, y, x+25, y+35)
   end
 
   return self
@@ -94,6 +134,7 @@ function _init()
 
   -- Initialize actors.
   add(actors, player.new(64, 64))
+  add(actors, spawner.new())
 end
 
 function update_game()
