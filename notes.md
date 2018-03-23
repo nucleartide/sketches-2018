@@ -1,0 +1,23 @@
+- _Rasterization_: process of finding 2D pixel coordinates of 3D points
+  - Can also do ray tracing
+- _Raster image_: 2D array of pixels
+- To create an image,
+  - Extend lines from vertices towards eye
+  - Find intersection of lines with "canvas" that is perpendicular to line of sight
+- Compute world coordinates of point in front of camera
+  - Can be done with simple point-matrix multiplication
+  - This is also called the _perspective projection matrix_
+  - [Lesson](lesson) teaches how to compute coordinates without perspective projection matrix
+- Foreshortening
+  - Objects angled towards the viewer appear smaller
+- _World space_; has a _world origin_
+- 4x4 matrix represents a Cartesian coordinate system (and vice versa)
+  - Other coordinate systems are defined with respect to the world coordinate system
+    - We can call these "local" coordinate systems
+  - We can interpret the top-left 3x3 matrix as the x-, y-, and z- axes.
+- We can visualize a transformation matrix as transforming a coordinate system
+- Transform between world and local spaces
+  - `P(world) = P(local) * M`
+  - `P(local) = P(world) * M(inverse)`
+
+[lesson]: https://www.scratchapixel.com/lessons/3d-basic-rendering/computing-pixel-coordinates-of-3d-point/perspective-projection
